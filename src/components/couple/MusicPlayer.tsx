@@ -284,7 +284,7 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
 
   if (!currentVideoId && currentSong) {
      return (
-      <Card className="shadow-lg animate-fade-in sticky bottom-4 left-4 right-4 md:max-w-md md:ml-auto z-50 bg-background/90 backdrop-blur-sm">
+      <Card className="shadow-lg animate-fade-in sticky bottom-4 inset-x-4 md:left-auto md:max-w-md z-50 w-full max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto bg-background/90 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-xl font-headline text-primary-foreground">
              <div className="flex items-center">
@@ -303,7 +303,7 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
 
 
   return (
-    <Card className="shadow-lg animate-fade-in sticky bottom-4 left-4 right-4 md:max-w-md md:ml-auto z-50 bg-background/90 backdrop-blur-sm">
+    <Card className="shadow-lg animate-fade-in sticky bottom-4 inset-x-4 md:left-auto md:max-w-md z-50 w-full max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto bg-background/90 backdrop-blur-sm">
       {/* Hidden div for YouTube player */}
       <div id={YOUTUBE_PLAYER_DOM_ID} style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '1px', height: '1px' }} />
       

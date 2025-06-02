@@ -6,16 +6,16 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col items-center text-center animate-fade-in">
-      <Heart className="w-24 h-24 text-primary mb-8 animate-pulse" />
-      <h1 className="text-6xl font-headline text-primary-foreground mb-6">
+      <Heart className="w-16 h-16 sm:w-24 sm:h-24 text-primary mb-8 animate-pulse" />
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline text-primary-foreground mb-6">
         Evermore Bond
       </h1>
-      <p className="text-2xl font-body text-muted-foreground mb-12 max-w-2xl">
+      <p className="text-lg sm:text-xl md:text-2xl font-body text-muted-foreground mb-12 max-w-2xl">
         Craft your unique digital love story. A private space to cherish memories, celebrate milestones, and grow together, forever.
       </p>
       
       <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-        <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-xl px-10 py-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+        <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-xl px-6 py-4 sm:px-8 sm:py-5 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
           <Link href="/couple/our-story/edit">Create Your Couple Space</Link>
         </Button>
       </div>

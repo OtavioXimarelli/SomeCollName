@@ -135,10 +135,10 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
-            <TabsTrigger value="general" className="text-base py-3"><Settings className="mr-2 h-5 w-5" />General</TabsTrigger>
-            <TabsTrigger value="photos" className="text-base py-3"><ImageIcon className="mr-2 h-5 w-5" />Photos</TabsTrigger>
-            <TabsTrigger value="music" className="text-base py-3"><Music2Icon className="mr-2 h-5 w-5" />Music</TabsTrigger>
-            <TabsTrigger value="share" className="text-base py-3"><QrCodeIcon className="mr-2 h-5 w-5" />Share</TabsTrigger>
+            <TabsTrigger value="general" className="text-sm sm:text-base py-2 sm:py-3"><Settings className="mr-2 h-5 w-5" />General</TabsTrigger>
+            <TabsTrigger value="photos" className="text-sm sm:text-base py-2 sm:py-3"><ImageIcon className="mr-2 h-5 w-5" />Photos</TabsTrigger>
+            <TabsTrigger value="music" className="text-sm sm:text-base py-2 sm:py-3"><Music2Icon className="mr-2 h-5 w-5" />Music</TabsTrigger>
+            <TabsTrigger value="share" className="text-sm sm:text-base py-2 sm:py-3"><QrCodeIcon className="mr-2 h-5 w-5" />Share</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
