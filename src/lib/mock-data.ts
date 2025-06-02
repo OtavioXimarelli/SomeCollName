@@ -8,9 +8,9 @@ const defaultPhotos: Photo[] = [
 ];
 
 const defaultPlaylist: Song[] = [
-  { id: '1', title: 'Enchanted Dreams', artist: 'Seraphina Moon', url: '/music/placeholder_romantic_1.mp3' },
-  { id: '2', title: 'Whispers of the Heart', artist: 'Orion Starlight', url: '/music/placeholder_romantic_2.mp3' },
-  { id: '3', title: 'Eternal Embrace', artist: 'Luna Meadow', url: '/music/placeholder_romantic_3.mp3' },
+  { id: '1', title: 'Coffee Shop Lofi', artist: 'Various Artists', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
+  { id: '2', title: 'Chillhop Essentials', artist: 'Chillhop Music', url: 'https://www.youtube.com/watch?v=5qap5aO4i9A' },
+  { id: '3', title: 'Epic Cinematic Music', artist: 'ャAlexis', url: 'https://www.youtube.com/watch?v=DWcJFNfaw9c' },
 ];
 
 // Simulating a "database"

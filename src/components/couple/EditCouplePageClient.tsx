@@ -30,7 +30,7 @@ const musicSettingsSchema = z.object({
   songs: z.array(z.object({
     title: z.string().min(1, "Song title is required"),
     artist: z.string().min(1, "Artist name is required"),
-    url: z.string().url("Must be a valid URL").min(1, "Song URL is required"),
+    url: z.string().url("Must be a valid URL (e.g., YouTube video link)").min(1, "Song URL is required"),
   })).max(10, "Playlist can have a maximum of 10 songs."), // Limit playlist size
 });
 type MusicSettingsFormValues = z.infer<typeof musicSettingsSchema>;
@@ -200,7 +200,7 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline text-xl">Music Playlist</CardTitle>
-                <CardDescription>Manage the songs for your background music player. Add up to 10 songs.</CardDescription>
+                <CardDescription>Manage the songs for your background music player. Add up to 10 songs. Use YouTube video URLs.</CardDescription>
               </CardHeader>
               <CardContent>
                  <form onSubmit={musicForm.handleSubmit(handleMusicSettingsSubmit)} className="space-y-6">
@@ -211,9 +211,9 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                          <Button type="button" variant="ghost" size="icon" onClick={() => {
                              const currentSongs = musicForm.getValues('songs');
                              currentSongs.splice(index, 1);
-                             musicForm.setValue('songs', currentSongs);
+                             musicForm.setValue('songs', currentSongs, { shouldValidate: true });
                            }}
-                           disabled={songsFields.length <=1 && index === 0}
+                           disabled={songsFields.length <=1 && index === 0 && songsFields[0]?.title === "" && songsFields[0]?.artist === "" && songsFields[0]?.url === ""}
                            className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
                          >
                            <Trash2 className="h-4 w-4" />
@@ -230,8 +230,8 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                          {musicForm.formState.errors.songs?.[index]?.artist && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.artist?.message}</p>}
                       </div>
                       <div>
-                        <Label htmlFor={`songs.${index}.url`} className="text-sm">Song URL</Label>
-                        <Input id={`songs.${index}.url`} type="url" {...musicForm.register(`songs.${index}.url`)} placeholder="https://example.com/song.mp3" className="mt-1" />
+                        <Label htmlFor={`songs.${index}.url`} className="text-sm">Song URL (YouTube)</Label>
+                        <Input id={`songs.${index}.url`} type="url" {...musicForm.register(`songs.${index}.url`)} placeholder="https://www.youtube.com/watch?v=..." className="mt-1" />
                         {musicForm.formState.errors.songs?.[index]?.url && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.url?.message}</p>}
                       </div>
                     </Card>
@@ -239,7 +239,7 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                   <Button type="button" variant="outline" onClick={() => {
                       if (songsFields.length < 10) {
                         const currentSongs = musicForm.getValues('songs');
-                        musicForm.setValue('songs', [...currentSongs, { title: "", artist: "", url: "" }]);
+                        musicForm.setValue('songs', [...currentSongs, { title: "", artist: "", url: "" }], { shouldValidate: true });
                       } else {
                         toast({ title: "Playlist Full", description: "You can add a maximum of 10 songs.", variant: "destructive" });
                       }
