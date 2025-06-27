@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import AppHeader from '@/components/layout/AppHeader';
 
 export const metadata: Metadata = {
-  title: 'Evermore Bond',
-  description: 'Craft your unique digital love story.',
+  title: 'Laço Eterno',
+  description: 'Crie sua história de amor digital única.',
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
