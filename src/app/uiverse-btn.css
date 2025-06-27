@@ -1,0 +1,116 @@
+.uiverse-btn {
+  position: relative;
+  display: inline-flex;
+  height: 3.5rem;
+  align-items: center;
+  border-radius: 9999px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  font-family: Segoe UI, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.04em;
+  background: linear-gradient(90deg, #ec4899 0%, #a21caf 50%, #f43f5e 100%);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s;
+  border: 2px solid #f9a8d4;
+  box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.25), 0 1.5px 8px 0 rgba(244, 63, 94, 0.10);
+}
+.uiverse-btn:hover, .uiverse-btn:focus {
+  box-shadow: 0 12px 40px 0 rgba(236, 72, 153, 0.35), 0 2px 12px 0 rgba(244, 63, 94, 0.15);
+  outline: none;
+  border-color: #f472b6;
+}
+.uiverse-btn .uiverse-btn-bg {
+  background: linear-gradient(120deg, #f9a8d4 0%, #a21caf 100%);
+  opacity: 0.18;
+  border-radius: 2rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.uiverse-btn-bg-layers {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  top: -60%;
+  aspect-ratio: 1 / 1;
+  width: max(200%, 10rem);
+  z-index: 1;
+}
+.uiverse-btn-bg-layer {
+  border-radius: 9999px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(0);
+  transition:
+    transform 1.3s cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 0.3s linear;
+}
+.uiverse-btn-bg-layer.-purple {
+  background-color: #a21caf;
+}
+.uiverse-btn-bg-layer.-turquoise {
+  background-color: #f472b6;
+}
+.uiverse-btn-bg-layer.-yellow {
+  background-color: #f43f5e;
+}
+.uiverse-btn-inner,
+.uiverse-btn-inner-hover,
+.uiverse-btn-inner-static {
+  pointer-events: none;
+  display: block;
+}
+.uiverse-btn-inner {
+  position: relative;
+  z-index: 2;
+}
+.uiverse-btn-inner-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: translateY(70%);
+  transition:
+    transform 1.4s cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 1.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.uiverse-btn-inner-static {
+  transition:
+    transform 1.4s cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 0.3s linear;
+}
+.uiverse-btn:hover .uiverse-btn-inner-static {
+  opacity: 0;
+  transform: translateY(-70%);
+}
+.uiverse-btn:hover .uiverse-btn-inner-hover {
+  opacity: 1;
+  transform: translateY(0);
+}
+.uiverse-btn:hover .uiverse-btn-bg-layer {
+  transition:
+    transform 1.3s cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 0.3s linear;
+}
+.uiverse-btn:hover .uiverse-btn-bg-layer-1 {
+  transform: scale(1);
+}
+.uiverse-btn:hover .uiverse-btn-bg-layer-2 {
+  transition-delay: 0.1s;
+  transform: scale(1);
+}
+.uiverse-btn:hover .uiverse-btn-bg-layer-3 {
+  transition-delay: 0.2s;
+  transform: scale(1);
+}

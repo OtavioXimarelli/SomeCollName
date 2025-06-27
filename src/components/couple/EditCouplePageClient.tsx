@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { CoupleData, Photo, Song } from '@/types';
@@ -23,16 +22,16 @@ import { Textarea } from '../ui/textarea';
 
 const generalSettingsSchema = z.object({
   coupleName: z.string().optional(),
-  startDate: z.date({ required_error: "Please select your relationship start date."}),
+  startDate: z.date({ required_error: "Selecione a data de início do relacionamento."}),
 });
 type GeneralSettingsFormValues = z.infer<typeof generalSettingsSchema>;
 
 const musicSettingsSchema = z.object({
   songs: z.array(z.object({
-    title: z.string().min(1, "Song title is required"),
-    artist: z.string().min(1, "Artist name is required"),
-    url: z.string().url("Must be a valid URL (e.g., YouTube video link)").min(1, "Song URL is required"),
-  })).max(10, "Playlist can have a maximum of 10 songs."), // Limit playlist size
+    title: z.string().min(1, "Título da música é obrigatório"),
+    artist: z.string().min(1, "Nome do artista é obrigatório"),
+    url: z.string().url("Deve ser uma URL válida (ex: link do YouTube)").min(1, "URL da música é obrigatória"),
+  })).max(10, "A playlist pode ter no máximo 10 músicas."), // Limit playlist size
 });
 type MusicSettingsFormValues = z.infer<typeof musicSettingsSchema>;
 
@@ -88,12 +87,12 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
       });
       if (updatedData) {
         setCoupleData(updatedData);
-        toast({ title: "Settings saved!", description: "Your general settings have been updated." });
+        toast({ title: "Configurações salvas!", description: "Suas configurações gerais foram atualizadas." });
       } else {
-        throw new Error("Failed to save general settings.");
+        throw new Error("Falha ao salvar configurações gerais.");
       }
     } catch (error) {
-      toast({ title: "Save failed", description: (error as Error).message || "Could not save general settings.", variant: "destructive" });
+      toast({ title: "Falha ao salvar", description: (error as Error).message || "Não foi possível salvar as configurações gerais.", variant: "destructive" });
     }
   };
 
@@ -103,12 +102,12 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
       const updatedData = await updatePlaylistAction(coupleData.id, newPlaylist);
       if (updatedData) {
         setCoupleData(updatedData);
-        toast({ title: "Playlist updated!", description: "Your music playlist has been saved." });
+        toast({ title: "Playlist atualizada!", description: "Sua playlist de músicas foi salva." });
       } else {
-        throw new Error("Failed to update playlist.");
+        throw new Error("Falha ao atualizar a playlist.");
       }
     } catch (error) {
-      toast({ title: "Save failed", description: (error as Error).message || "Could not save playlist.", variant: "destructive" });
+      toast({ title: "Falha ao salvar", description: (error as Error).message || "Não foi possível salvar a playlist.", variant: "destructive" });
     }
   };
   
@@ -117,58 +116,56 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
   };
 
   // Music form dynamic fields
-  const { fields, append, remove } = musicForm.control.register ? musicForm.control : { fields: [], append: () => {}, remove: () => {} }; // Basic handling for useFieldArray like structure
-  // This is a simplified way to handle dynamic fields without useFieldArray for brevity
-  // In a real app, useFieldArray from react-hook-form is preferred.
+  // Corrigido: Removido o uso de fields, append, remove que não existem sem useFieldArray
   const songsFields = musicForm.watch('songs');
 
 
   return (
-    <Card className="shadow-xl animate-fade-in">
+    <Card className="">
       <CardHeader>
-        <CardTitle className="text-4xl font-headline text-primary-foreground flex items-center">
-          <Settings className="mr-3 h-10 w-10 text-accent" /> Customize Your Space
+        <CardTitle className="text-4xl font-headline text-fuchsia-700 flex items-center">
+          <Settings className="mr-3 h-10 w-10 text-fuchsia-500" /> Personalize seu Espaço
         </CardTitle>
-        <CardDescription className="text-lg">
-          Personalize your couple's page with your unique touches, memories, and soundtrack.
+        <CardDescription className="text-lg text-rose-500">
+          Personalize a página do casal com seus toques, memórias e trilha sonora.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <TabsTrigger value="general" className="text-sm sm:text-base py-2 sm:py-3"><Settings className="mr-1.5 h-4 w-4" />General</TabsTrigger>
-            <TabsTrigger value="photos" className="text-sm sm:text-base py-2 sm:py-3"><ImageIcon className="mr-1.5 h-4 w-4" />Photos</TabsTrigger>
-            <TabsTrigger value="music" className="text-sm sm:text-base py-2 sm:py-3"><Music2Icon className="mr-1.5 h-4 w-4" />Music</TabsTrigger>
-            <TabsTrigger value="share" className="text-sm sm:text-base py-2 sm:py-3"><QrCodeIcon className="mr-1.5 h-4 w-4" />Share</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 mb-6 bg-pink-100/60">
+            <TabsTrigger value="general" className="text-sm sm:text-base py-2 sm:py-3 text-fuchsia-700"><Settings className="mr-1.5 h-4 w-4 text-fuchsia-500" />Geral</TabsTrigger>
+            <TabsTrigger value="photos" className="text-sm sm:text-base py-2 sm:py-3 text-fuchsia-700"><ImageIcon className="mr-1.5 h-4 w-4 text-fuchsia-500" />Fotos</TabsTrigger>
+            <TabsTrigger value="music" className="text-sm sm:text-base py-2 sm:py-3 text-fuchsia-700"><Music2Icon className="mr-1.5 h-4 w-4 text-fuchsia-500" />Música</TabsTrigger>
+            <TabsTrigger value="share" className="text-sm sm:text-base py-2 sm:py-3 text-fuchsia-700"><QrCodeIcon className="mr-1.5 h-4 w-4 text-fuchsia-500" />Compartilhar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline text-xl">General Settings</CardTitle>
-                <CardDescription>Set your couple's name and relationship start date.</CardDescription>
+                <CardTitle className="font-headline text-xl text-fuchsia-700">Configurações Gerais</CardTitle>
+                <CardDescription>Defina o nome do casal e a data de início do relacionamento.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={generalForm.handleSubmit(handleGeneralSettingsSubmit)} className="space-y-6">
                   <div>
-                    <Label htmlFor="coupleName" className="text-base">Couple's Name (Optional)</Label>
+                    <Label htmlFor="coupleName" className="text-base text-fuchsia-700">Nome do Casal (Opcional)</Label>
                     <Input 
                       id="coupleName" 
-                      placeholder="e.g., Alex & Jamie" 
+                      placeholder="ex: Alex & Jamie" 
                       {...generalForm.register("coupleName")} 
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="startDate" className="text-base">Relationship Start Date</Label>
+                    <Label htmlFor="startDate" className="text-base text-fuchsia-700">Data de Início do Relacionamento</Label>
                      <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant={"outline"}
                             className="w-full justify-start text-left font-normal mt-1"
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {generalForm.watch("startDate") ? format(generalForm.watch("startDate"), "PPP") : <span>Pick a date</span>}
+                            <CalendarIcon className="mr-2 h-4 w-4 text-fuchsia-500" />
+                            {generalForm.watch("startDate") ? format(generalForm.watch("startDate"), "PPP") : <span>Selecione uma data</span>}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -186,7 +183,7 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                     {generalForm.formState.errors.startDate && <p className="text-sm text-destructive mt-1">{generalForm.formState.errors.startDate.message}</p>}
                   </div>
                   <Button type="submit" disabled={generalForm.formState.isSubmitting} className="w-full sm:w-auto">
-                    {generalForm.formState.isSubmitting ? "Saving..." : <><Save className="mr-2 h-4 w-4" /> Save General Settings</>}
+                    {generalForm.formState.isSubmitting ? "Salvando..." : <><Save className="mr-2 h-4 w-4" /> Salvar Configurações Gerais</>}
                   </Button>
                 </form>
               </CardContent>
@@ -200,15 +197,15 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
           <TabsContent value="music">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline text-xl">Music Playlist</CardTitle>
-                <CardDescription>Manage the songs for your background music player. Add up to 10 songs. Use YouTube video URLs.</CardDescription>
+                <CardTitle className="font-headline text-xl">Playlist de Música</CardTitle>
+                <CardDescription>Gerencie as músicas para o seu tocador de música de fundo. Adicione até 10 músicas. Use URLs de vídeos do YouTube.</CardDescription>
               </CardHeader>
               <CardContent>
                  <form onSubmit={musicForm.handleSubmit(handleMusicSettingsSubmit)} className="space-y-6">
                   {songsFields.map((song, index) => (
                     <Card key={index} className="p-4 space-y-3 bg-muted/30">
                        <div className="flex justify-between items-center">
-                         <h4 className="font-semibold text-primary-foreground">Song #{index + 1}</h4>
+                         <h4 className="font-semibold text-primary-foreground">Música #{index + 1}</h4>
                          <Button type="button" variant="ghost" size="icon" onClick={() => {
                              const currentSongs = musicForm.getValues('songs');
                              currentSongs.splice(index, 1);
@@ -221,17 +218,17 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                          </Button>
                        </div>
                       <div>
-                        <Label htmlFor={`songs.${index}.title`} className="text-sm">Title</Label>
-                        <Input id={`songs.${index}.title`} {...musicForm.register(`songs.${index}.title`)} placeholder="Song Title" className="mt-1" />
+                        <Label htmlFor={`songs.${index}.title`} className="text-sm">Título</Label>
+                        <Input id={`songs.${index}.title`} {...musicForm.register(`songs.${index}.title`)} placeholder="Título da Música" className="mt-1" />
                         {musicForm.formState.errors.songs?.[index]?.title && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.title?.message}</p>}
                       </div>
                       <div>
-                        <Label htmlFor={`songs.${index}.artist`} className="text-sm">Artist</Label>
-                        <Input id={`songs.${index}.artist`} {...musicForm.register(`songs.${index}.artist`)} placeholder="Artist Name" className="mt-1" />
+                        <Label htmlFor={`songs.${index}.artist`} className="text-sm">Artista</Label>
+                        <Input id={`songs.${index}.artist`} {...musicForm.register(`songs.${index}.artist`)} placeholder="Nome do Artista" className="mt-1" />
                          {musicForm.formState.errors.songs?.[index]?.artist && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.artist?.message}</p>}
                       </div>
                       <div>
-                        <Label htmlFor={`songs.${index}.url`} className="text-sm">Song URL (YouTube)</Label>
+                        <Label htmlFor={`songs.${index}.url`} className="text-sm">URL da Música (YouTube)</Label>
                         <Input id={`songs.${index}.url`} type="url" {...musicForm.register(`songs.${index}.url`)} placeholder="https://www.youtube.com/watch?v=..." className="mt-1" />
                         {musicForm.formState.errors.songs?.[index]?.url && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.url?.message}</p>}
                       </div>
@@ -242,15 +239,15 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                         const currentSongs = musicForm.getValues('songs');
                         musicForm.setValue('songs', [...currentSongs, { title: "", artist: "", url: "" }], { shouldValidate: true });
                       } else {
-                        toast({ title: "Playlist Full", description: "You can add a maximum of 10 songs.", variant: "destructive" });
+                        toast({ title: "Playlist Cheia", description: "Você pode adicionar no máximo 10 músicas.", variant: "destructive" });
                       }
                     }}
                     disabled={songsFields.length >= 10}
                   >
-                    Add Song
+                    Adicionar Música
                   </Button>
                    <Button type="submit" disabled={musicForm.formState.isSubmitting} className="w-full sm:w-auto">
-                    {musicForm.formState.isSubmitting ? "Saving Playlist..." : <><Save className="mr-2 h-4 w-4" /> Save Playlist</>}
+                    {musicForm.formState.isSubmitting ? "Salvando Playlist..." : <><Save className="mr-2 h-4 w-4" /> Salvar Playlist</>}
                   </Button>
                 </form>
               </CardContent>

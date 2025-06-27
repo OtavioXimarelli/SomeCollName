@@ -14,12 +14,12 @@ export default function CouplePageLayout({
        <nav className="mb-6 flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-2">
         <Button variant="outline" asChild>
           <Link href={`/couple/${params.id}`}>
-            <Home className="mr-2 h-4 w-4" /> View Our Space
+            <Home className="mr-2 h-4 w-4" /> Ver Nosso Espaço
           </Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href={`/couple/${params.id}/edit`}>
-            <Settings className="mr-2 h-4 w-4" /> Customize
+            <Settings className="mr-2 h-4 w-4" /> Personalizar
           </Link>
         </Button>
       </nav>

@@ -13,16 +13,16 @@ export default async function CoupleEditPage({ params }: CoupleEditPageProps) {
   let coupleData = await getCoupleData(params.id);
 
   if (!coupleData) {
-    // If no data, this might be a new couple space. Create it.
+    // Se não houver dados, pode ser um novo espaço de casal. Crie-o.
     coupleData = await createNewCoupleSpace(params.id);
-    // Fallback if creation also fails or is not desired here
+    // Fallback se a criação também falhar ou não for desejada aqui
     if(!coupleData) {
        return (
         <div className="text-center py-10">
-          <h1 className="text-3xl font-headline mb-4">Error</h1>
-          <p className="text-muted-foreground mb-6">Could not load or create couple space data for ID "{params.id}".</p>
+          <h1 className="text-3xl font-headline mb-4">Erro</h1>
+          <p className="text-muted-foreground mb-6">Não foi possível carregar ou criar os dados do espaço do casal para o ID "{params.id}".</p>
           <Button asChild>
-            <Link href="/">Go to Homepage</Link>
+            <Link href="/">Ir para a Página Inicial</Link>
           </Button>
         </div>
       );

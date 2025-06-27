@@ -13,7 +13,7 @@ export default function QRCodeDisplay({ couplePageId }: QRCodeDisplayProps) {
   const [pageUrl, setPageUrl] = useState('');
 
   useEffect(() => {
-    // Ensure this runs only on the client where window is available
+    // Garante que roda apenas no client, onde window está disponível
     if (typeof window !== 'undefined') {
       setPageUrl(`${window.location.origin}/couple/${couplePageId}`);
     }
@@ -23,31 +23,31 @@ export default function QRCodeDisplay({ couplePageId }: QRCodeDisplayProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center"><QrCode className="mr-2 h-5 w-5 text-accent" /> Share Your Space</CardTitle>
+          <CardTitle className="flex items-center text-fuchsia-700"><QrCode className="mr-2 h-5 w-5 text-fuchsia-500" /> Compartilhe seu Espaço</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Generating QR Code...</p>
+          <p>Gerando QR Code...</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="shadow-lg animate-fade-in">
+    <Card className="">
       <CardHeader>
-        <CardTitle className="flex items-center text-xl font-headline">
-          <QrCode className="mr-2 h-6 w-6 text-accent" /> Share Your Space
+        <CardTitle className="flex items-center text-xl font-headline text-fuchsia-700">
+          <QrCode className="mr-2 h-6 w-6 text-fuchsia-500" /> Compartilhe seu Espaço
         </CardTitle>
         <CardDescription>
-          Scan this QR code to easily access your couple's page.
+          Escaneie este QR code para acessar facilmente a página do casal.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-6">
         <div className="bg-white p-4 rounded-lg shadow-inner inline-block">
           <QRCode value={pageUrl} size={192} level="H" />
         </div>
-        <p className="mt-4 text-sm text-muted-foreground break-all">
-          Or share this link: <a href={pageUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{pageUrl}</a>
+        <p className="mt-4 text-sm text-rose-500 break-all">
+          Ou compartilhe este link: <a href={pageUrl} target="_blank" rel="noopener noreferrer" className="text-fuchsia-700 hover:underline">{pageUrl}</a>
         </p>
       </CardContent>
     </Card>

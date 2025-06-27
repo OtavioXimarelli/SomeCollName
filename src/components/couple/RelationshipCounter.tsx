@@ -24,7 +24,7 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
 
   useEffect(() => {
     if (isNaN(startDate.getTime())) {
-      // Invalid date
+      // Data inválida
       setDuration(null);
       return;
     }
@@ -51,22 +51,22 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
       setDuration({ years, months, days, hours, minutes, seconds });
     };
 
-    calculateDuration(); // Initial calculation
-    const intervalId = setInterval(calculateDuration, 1000); // Update every second
+    calculateDuration(); // Cálculo inicial
+    const intervalId = setInterval(calculateDuration, 1000); // Atualiza a cada segundo
 
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
   }, [startDateString]);
 
   if (!duration) {
     return (
-      <Card className="shadow-lg animate-fade-in">
+      <Card className="">
         <CardHeader>
-          <CardTitle className="flex items-center text-xl font-headline">
-            <CalendarDays className="mr-2 h-6 w-6 text-accent" /> Our Journey So Far
+          <CardTitle className="flex items-center text-xl font-headline text-fuchsia-700">
+            <CalendarDays className="mr-2 h-6 w-6 text-fuchsia-500" /> Nossa Jornada Até Aqui
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Loading relationship duration...</p>
+          <p className="text-rose-600">Carregando duração do relacionamento...</p>
         </CardContent>
       </Card>
     );
@@ -74,14 +74,14 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
   
   if (isNaN(startDate.getTime())) {
      return (
-      <Card className="shadow-lg animate-fade-in">
+      <Card className="">
         <CardHeader>
-          <CardTitle className="flex items-center text-xl font-headline">
-            <CalendarDays className="mr-2 h-6 w-6 text-accent" /> Our Journey So Far
+          <CardTitle className="flex items-center text-xl font-headline text-fuchsia-700">
+            <CalendarDays className="mr-2 h-6 w-6 text-fuchsia-500" /> Nossa Jornada Até Aqui
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-destructive-foreground bg-destructive p-2 rounded-md">Invalid start date provided. Please set a valid date in the edit section.</p>
+          <p className="text-destructive-foreground bg-destructive p-2 rounded-md">Data de início inválida. Por favor, defina uma data válida na seção de edição.</p>
         </CardContent>
       </Card>
     );
@@ -89,23 +89,23 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
 
 
   return (
-    <Card className="shadow-lg animate-fade-in mb-8">
+    <Card className="mb-8">
       <CardHeader>
-        <CardTitle className="flex items-center text-2xl font-headline text-primary-foreground">
-          <CalendarDays className="mr-3 h-8 w-8 text-accent" /> Our Journey So Far
+        <CardTitle className="flex items-center text-2xl font-headline text-fuchsia-700">
+          <CalendarDays className="mr-3 h-8 w-8 text-fuchsia-500" /> Nossa Jornada Até Aqui
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
           {Object.entries(duration).map(([unit, value]) => (
-            <div key={unit} className="bg-primary/20 p-4 rounded-lg shadow">
-              <div className="text-4xl font-headline text-accent-foreground">{value}</div>
-              <div className="text-sm font-body text-muted-foreground capitalize">{unit}</div>
+            <div key={unit} className="bg-pink-100 p-4 rounded-lg shadow">
+              <div className="text-4xl font-headline text-fuchsia-700">{value}</div>
+              <div className="text-sm font-body text-rose-500 capitalize">{unit}</div>
             </div>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground mt-4 text-center">
-          Started on: {startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        <p className="text-sm text-rose-500 mt-4 text-center">
+          Iniciado em: {startDate.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
       </CardContent>
     </Card>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Play, Pause, SkipForward, SkipBack, Music2, ListMusic, Volume2, VolumeX } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import './yt-player-hidden.css';
 
 // Declare YT types for window object, or use 'any' if specific types are not installed
 declare global {
@@ -269,14 +270,14 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
 
   if (!playlist || playlist.length === 0) {
     return (
-      <Card className="shadow-lg animate-fade-in">
+      <Card className="">
         <CardHeader>
-          <CardTitle className="flex items-center text-xl font-headline text-primary-foreground">
-            <Music2 className="mr-2 h-6 w-6 text-accent" /> Our Soundtrack
+          <CardTitle className="flex items-center text-xl font-headline text-fuchsia-700">
+            <Music2 className="mr-2 h-6 w-6 text-fuchsia-500" /> Nossa Trilha Sonora
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground font-body">No songs in the playlist. Add some YouTube video links in the edit section!</p>
+          <p className="font-body text-rose-600">Nenhuma música na playlist. Adicione links de vídeos do YouTube na seção de edição!</p>
         </CardContent>
       </Card>
     );
@@ -284,18 +285,18 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
 
   if (!currentVideoId && currentSong) {
      return (
-      <Card className="shadow-lg animate-fade-in sticky bottom-4 inset-x-4 md:left-auto md:max-w-md z-50 w-full max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto bg-background/90 backdrop-blur-sm">
+      <Card className="sticky bottom-4 inset-x-4 md:left-auto md:max-w-md z-50 w-full max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto bg-white/90 backdrop-blur-md">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-xl font-headline text-primary-foreground">
+          <CardTitle className="flex items-center justify-between text-xl font-headline text-fuchsia-700">
              <div className="flex items-center">
-                <Music2 className="mr-2 h-6 w-6 text-accent" />
-                <span>{currentSong?.title || 'Our Soundtrack'}</span>
+                <Music2 className="mr-2 h-6 w-6 text-fuchsia-500" />
+                <span>{currentSong?.title || 'Nossa Trilha Sonora'}</span>
              </div>
           </CardTitle>
-          <p className="text-sm text-muted-foreground">{currentSong?.artist || 'Select a song'}</p>
+          <p className="text-sm text-rose-500">{currentSong?.artist || 'Selecione uma música'}</p>
         </CardHeader>
         <CardContent>
-            <p className="text-destructive font-body">Could not play this song. Invalid YouTube URL.</p>
+            <p className="text-destructive font-body">Não foi possível tocar esta música. URL do YouTube inválida.</p>
         </CardContent>
       </Card>
     );
@@ -303,21 +304,21 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
 
 
   return (
-    <Card className="shadow-lg animate-fade-in sticky bottom-4 inset-x-4 md:left-auto md:max-w-md z-50 w-full max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto bg-background/90 backdrop-blur-sm">
+    <Card className="sticky bottom-4 inset-x-4 md:left-auto md:max-w-md z-50 w-full max-w-xs sm:max-w-sm mx-auto md:mx-0 md:ml-auto bg-white/90 backdrop-blur-md">
       {/* Hidden div for YouTube player */}
-      <div id={YOUTUBE_PLAYER_DOM_ID} style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '1px', height: '1px' }} />
+      <div id={YOUTUBE_PLAYER_DOM_ID} className="yt-player-hidden" />
       
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between text-xl font-headline text-primary-foreground">
+        <CardTitle className="flex items-center justify-between text-xl font-headline text-fuchsia-700">
           <div className="flex items-center overflow-hidden">
-            <Music2 className="mr-2 h-6 w-6 text-accent flex-shrink-0" />
-            <span className="truncate" title={currentSong?.title}>{currentSong?.title || 'Our Soundtrack'}</span>
+            <Music2 className="mr-2 h-6 w-6 text-fuchsia-500 flex-shrink-0" />
+            <span className="truncate" title={currentSong?.title}>{currentSong?.title || 'Nossa Trilha Sonora'}</span>
           </div>
           <Button variant="ghost" size="icon" onClick={() => setShowPlaylist(!showPlaylist)}>
-            <ListMusic className="h-5 w-5 text-accent" />
+            <ListMusic className="h-5 w-5 text-fuchsia-500" />
           </Button>
         </CardTitle>
-        <p className="text-sm text-muted-foreground truncate" title={currentSong?.artist}>{currentSong?.artist || 'Select a song'}</p>
+        <p className="text-sm text-rose-500 truncate" title={currentSong?.artist}>{currentSong?.artist || 'Selecione uma música'}</p>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-2 mb-2">
@@ -337,7 +338,7 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
           <Button variant="ghost" size="icon" onClick={playPrev} disabled={!isPlayerReady || playlist.length <= 1}>
             <SkipBack className="h-6 w-6 text-accent" />
           </Button>
-          <Button variant="primary" size="icon" onClick={togglePlayPause} className="w-12 h-12 rounded-full" disabled={!isPlayerReady || !currentVideoId}>
+          <Button variant="default" size="icon" onClick={togglePlayPause} className="w-12 h-12 rounded-full" disabled={!isPlayerReady || !currentVideoId}>
             {isPlaying ? <Pause className="h-7 w-7" /> : <Play className="h-7 w-7" />}
           </Button>
           <Button variant="ghost" size="icon" onClick={playNext} disabled={!isPlayerReady || playlist.length <= 1}>
@@ -383,7 +384,7 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
                     <div className="flex flex-col overflow-hidden">
                       <span className="text-sm truncate" title={song.title}>{song.title}</span>
                       <span className="text-xs text-muted-foreground truncate" title={song.artist}>{song.artist}</span>
-                      {!getYouTubeID(song.url) && <span className="text-xs text-destructive"> (Invalid URL)</span>}
+                      {!getYouTubeID(song.url) && <span className="text-xs text-destructive"> (URL Inválida)</span>}
                     </div>
                   </Button>
                 </li>
