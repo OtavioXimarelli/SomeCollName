@@ -1,33 +1,27 @@
 "use client";
 
-import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { suggestPhotoCaptionAction, addPhotoAction, deletePhotoAction, updatePhotoCaptionAction } from '@/lib/actions';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Send, Trash2, Edit3, ImagePlus, Wand2, RefreshCw } from 'lucide-react';
-import Image from 'next/image';
+import { addPhotoAction, deletePhotoAction, updatePhotoCaptionAction, suggestPhotoCaptionAction } from '@/lib/actions';
 import type { Photo } from '@/types';
-
-interface PhotoUploadFormProps {
-  coupleId: string;
-  currentPhotos: Photo[];
-  onPhotoListChange: (photos: Photo[]) => void; // Callback to update parent state
-}
+import { useState } from 'react';
+import { ImagePlus, Trash2, Edit, Save, Sparkles, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const photoUploadSchema = z.object({
-  photoFile: z.custom<FileList>().refine(files => files && files.length > 0, "Foto é obrigatória."),
+  photoFile: z.instanceof(FileList).refine(files => files?.length === 1, "É necessário selecionar uma foto."),
   context: z.string().optional(),
-  captionChoice: z.string().optional(), // Para legenda sugerida por IA ou inserção manual
+  captionChoice: z.string().optional(),
 });
-
 type PhotoUploadFormValues = z.infer<typeof photoUploadSchema>;
 
 const fileToDataUri = (file: File): Promise<string> => {
@@ -38,6 +32,12 @@ const fileToDataUri = (file: File): Promise<string> => {
     reader.readAsDataURL(file);
   });
 };
+
+interface PhotoUploadFormProps {
+  coupleId: string;
+  currentPhotos: Photo[];
+  onPhotoListChange: (photos: Photo[]) => void;
+}
 
 export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListChange }: PhotoUploadFormProps) {
   const [isUploading, setIsUploading] = useState(false);
@@ -62,8 +62,8 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
     const file = event.target.files?.[0];
     if (file) {
       setSelectedPhotoPreview(URL.createObjectURL(file));
-      setSuggestedCaptions([]); // Reset suggestions on new file
-      form.setValue('captionChoice', ''); // Reset caption choice
+      setSuggestedCaptions([]);
+      form.setValue('captionChoice', '');
       setManualCaption('');
     } else {
       setSelectedPhotoPreview(null);
@@ -84,7 +84,7 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
       const result = await suggestPhotoCaptionAction({ photoDataUri, context });
       if (result.captions.length > 0) {
         setSuggestedCaptions(result.captions);
-        form.setValue('captionChoice', result.captions[0]); // Pre-select first suggestion
+        form.setValue('captionChoice', result.captions[0]);
       } else {
         toast({ title: "Sem sugestões", description: "A IA não conseguiu gerar legendas. Tente outra foto ou contexto." });
       }
@@ -99,14 +99,8 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
     setIsUploading(true);
     try {
       const photoFile = data.photoFile[0];
-      const photoUrl = URL.createObjectURL(photoFile); // Temporary URL for display, real URL would come from storage
-      // In a real app, you'd upload photoFile to a storage service and get back a URL.
-      // For this mock, we'll use the object URL and assume it's "uploaded".
-
       const finalCaption = suggestedCaptions.length > 0 ? data.captionChoice : manualCaption;
-
-      const result = await addPhotoAction(coupleId, { url: `https://placehold.co/400x300.png?text=${encodeURIComponent(photoFile.name)}` /* Replace with actual uploaded URL */, caption: finalCaption || "" });
-      
+      const result = await addPhotoAction(coupleId, { url: `https://placehold.co/400x300.png?text=${encodeURIComponent(photoFile.name)}`, caption: finalCaption || "" });
       if (result && result.photos) {
         onPhotoListChange(result.photos);
         toast({ title: "Foto adicionada!", description: "Sua nova memória foi salva." });
@@ -115,9 +109,8 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
         setSuggestedCaptions([]);
         setManualCaption('');
       } else {
-         throw new Error("Falha ao adicionar foto.");
+        throw new Error("Falha ao adicionar foto.");
       }
-
     } catch (error) {
       toast({ title: "Falha no upload", description: (error as Error).message || "Não foi possível salvar a foto.", variant: "destructive" });
     } finally {
@@ -138,10 +131,10 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
         throw new Error("Falha ao excluir foto.");
       }
     } catch (error) {
-       toast({ title: "Falha ao excluir", description: (error as Error).message || "Não foi possível excluir a foto.", variant: "destructive" });
+      toast({ title: "Falha ao excluir", description: (error as Error).message || "Não foi possível excluir a foto.", variant: "destructive" });
     }
   };
-  
+
   const handleEditCaption = (photo: Photo) => {
     setEditingPhotoId(photo.id);
     setEditingCaption(photo.caption);
@@ -149,7 +142,7 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
 
   const handleSaveCaption = async (photoId: string) => {
     if (!editingCaption.trim() && !window.confirm("A legenda está vazia. Salvar mesmo assim?")) {
-        return;
+      return;
     }
     try {
       const result = await updatePhotoCaptionAction(coupleId, photoId, editingCaption);
@@ -166,165 +159,108 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
     }
   };
 
-
   return (
     <div className="space-y-8">
-      <Card className="">
+      <Card className="bg-fuchsia-50/30 border-fuchsia-100 p-2">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl font-headline text-fuchsia-700"><ImagePlus className="mr-3 h-7 w-7 text-fuchsia-500" /> Adicionar Nova Foto</CardTitle>
-          <CardDescription>Compartilhe um novo momento precioso. Adicione contexto para melhores sugestões de legenda pela IA.</CardDescription>
+          <CardDescription className="text-rose-500">Compartilhe um novo momento. Adicione contexto para melhores sugestões de legenda.</CardDescription>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="photoFile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="photoFile" className="text-base text-fuchsia-700">Foto</FormLabel>
-                    <FormControl>
-                      <Input 
-                        id="photoFile" 
-                        type="file" 
-                        accept="image/*" 
-                        className="file:text-primary file:font-semibold"
-                        onChange={(e) => { field.onChange(e.target.files); handleFileChange(e); }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-4">
+            <div className="grid md:grid-cols-2 gap-6 items-start">
+              <div className="space-y-2">
+                <Label htmlFor="photo-upload" className="text-fuchsia-700 font-semibold">1. Escolha a Foto</Label>
+                <Input id="photo-upload" type="file" accept="image/*" {...form.register("photoFile")} onChange={handleFileChange} className="file:text-fuchsia-600 file:font-semibold" />
+                <FormMessage>{form.formState.errors.photoFile?.message?.toString()}</FormMessage>
+              </div>
               {selectedPhotoPreview && (
-                <div className="mt-4 border border-dashed border-border p-4 rounded-md flex justify-center">
-                  <Image src={selectedPhotoPreview} alt="Selected preview" width={200} height={200} className="rounded-md object-contain max-h-48" />
+                <div className="relative mx-auto border-2 border-fuchsia-200 rounded-xl overflow-hidden shadow-md">
+                  <Image src={selectedPhotoPreview} alt="Pré-visualização" width={200} height={200} className="object-cover" />
                 </div>
               )}
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="context"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-fuchsia-700 font-semibold">2. Adicione Contexto (Opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Ex: Nossa viagem para a praia em 2023!" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
+            <Button type="button" onClick={handleSuggestCaptions} disabled={isSuggesting || !selectedPhotoPreview} className="gap-2">
+              {isSuggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Gerar Legendas com IA
+            </Button>
+
+            {suggestedCaptions.length > 0 ? (
               <FormField
                 control={form.control}
-                name="context"
+                name="captionChoice"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="context" className="text-base text-fuchsia-700">Contexto (Opcional)</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-fuchsia-700 font-semibold">3. Escolha uma Legenda</FormLabel>
                     <FormControl>
-                      <Textarea id="context" placeholder="Ex: Nossa viagem à praia, comemorando aniversário..." {...field} />
+                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                        {suggestedCaptions.map((caption, i) => (
+                          <FormItem key={i} className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value={caption} /></FormControl>
+                            <FormLabel className="font-normal text-fuchsia-800">{caption}</FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
                     </FormControl>
-                    <FormDescription>Forneça algum contexto para as sugestões de legenda da IA.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            ) : (
+              <div>
+                <Label htmlFor="manual-caption" className="text-fuchsia-700 font-semibold">3. Ou Escreva sua Legenda</Label>
+                <Textarea id="manual-caption" value={manualCaption} onChange={(e) => setManualCaption(e.target.value)} placeholder="Sua legenda aqui..." />
+              </div>
+            )}
 
-              {selectedPhotoPreview && (
-                 <Button type="button" onClick={handleSuggestCaptions} disabled={isSuggesting || !form.getValues("photoFile")?.[0]} className="w-full sm:w-auto bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
-                  {isSuggesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                  Sugerir Legendas com IA
-                </Button>
-              )}
-
-              {suggestedCaptions.length > 0 && (
-                <FormField
-                  control={form.control}
-                  name="captionChoice"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel className="text-base text-fuchsia-700">Escolha uma Legenda ou Escreva a Sua:</FormLabel>
-                       {suggestedCaptions.map((caption, index) => (
-                        <FormItem key={index} className="flex items-center space-x-3 space-y-0">
-                          <FormControl>
-                            <Input type="radio" {...field} value={caption} checked={field.value === caption} id={`caption-${index}`} className="h-4 w-4"/>
-                          </FormControl>
-                          <FormLabel htmlFor={`caption-${index}`} className="font-normal text-sm cursor-pointer text-fuchsia-700">
-                            {caption}
-                          </FormLabel>
-                        </FormItem>
-                      ))}
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                         <FormControl>
-                            <Input type="radio" {...field} value={"manual"} checked={field.value === "manual"} id="caption-manual-radio" className="h-4 w-4"/>
-                          </FormControl>
-                         <FormLabel htmlFor="caption-manual-radio" className="font-normal text-sm cursor-pointer text-fuchsia-700">
-                            Escrever meu próprio
-                          </FormLabel>
-                      </FormItem>
-                       {field.value === "manual" && (
-                        <Textarea placeholder="Digite sua legenda aqui..." value={manualCaption} onChange={(e) => setManualCaption(e.target.value)} />
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              
-              {suggestedCaptions.length === 0 && selectedPhotoPreview && (
-                 <FormItem>
-                    <FormLabel htmlFor="manualCaption" className="text-base">Legenda</FormLabel>
-                    <FormControl>
-                      <Textarea id="manualCaption" placeholder="Escreva uma legenda para sua foto" value={manualCaption} onChange={(e) => setManualCaption(e.target.value)} />
-                    </FormControl>
-                 </FormItem>
-              )}
-
-
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isUploading || !form.getValues("photoFile")?.[0]} className="w-full sm:w-auto">
-                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-                Adicionar Foto
-              </Button>
-            </CardFooter>
+            <Button type="submit" disabled={isUploading} className="w-full sm:w-auto gap-2">
+              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar Foto
+            </Button>
           </form>
         </Form>
       </Card>
 
-      <Card className="shadow-xl animate-fade-in">
+      <Card className="bg-fuchsia-50/30 border-fuchsia-100 p-2">
         <CardHeader>
-          <CardTitle className="flex items-center text-2xl font-headline"><ImagePlus className="mr-3 h-7 w-7 text-accent" /> Gerenciar Fotos</CardTitle>
-          <CardDescription>Veja, edite legendas ou exclua suas fotos enviadas.</CardDescription>
+          <CardTitle className="flex items-center text-2xl font-headline text-fuchsia-700"><ImagePlus className="mr-3 h-7 w-7 text-fuchsia-500" /> Gerenciar Fotos</CardTitle>
         </CardHeader>
         <CardContent>
-          {currentPhotos.length === 0 ? (
-            <p className="text-muted-foreground">Nenhuma foto enviada ainda.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {currentPhotos.map(photo => (
-                <Card key={photo.id} className="overflow-hidden">
-                  <Image src={photo.url} alt={photo.caption || "Foto do casal"} width={300} height={200} className="w-full h-40 object-cover" data-ai-hint={photo.dataAiHint || "foto enviada"}/>
-                  <CardContent className="p-3 space-y-2">
-                    {editingPhotoId === photo.id ? (
-                      <div className="space-y-2">
-                        <Textarea 
-                          value={editingCaption}
-                          onChange={(e) => setEditingCaption(e.target.value)}
-                          placeholder="Digite a legenda"
-                          className="text-sm"
-                        />
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleSaveCaption(photo.id)}>Salvar</Button>
-                          <Button size="sm" variant="outline" onClick={() => setEditingPhotoId(null)}>Cancelar</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground min-h-[40px]">{photo.caption || "Sem legenda"}</p>
-                    )}
-                  </CardContent>
-                  <CardFooter className="p-3 flex justify-end gap-2 bg-muted/30">
-                     {editingPhotoId !== photo.id && (
-                        <Button variant="outline" size="sm" onClick={() => handleEditCaption(photo)}>
-                          <Edit3 className="mr-1 h-3 w-3" /> Editar
-                        </Button>
-                      )}
-                    <Button variant="destructive" size="sm" onClick={() => handleDeletePhoto(photo.id)}>
-                      <Trash2 className="mr-1 h-3 w-3" /> Excluir
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {currentPhotos.map((photo) => (
+              <div key={photo.id} className="relative group border-2 border-fuchsia-200 rounded-xl overflow-hidden shadow-md">
+                <Image src={photo.url} alt={photo.caption || 'Foto'} width={300} height={300} className="object-cover w-full h-full" />
+                <div className="absolute inset-0 bg-black/40 flex flex-col justify-between p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {editingPhotoId === photo.id ? (
+                    <div className="flex flex-col gap-2">
+                      <Textarea value={editingCaption} onChange={(e) => setEditingCaption(e.target.value)} className="text-sm" />
+                      <Button onClick={() => handleSaveCaption(photo.id)} size="sm" className="gap-1"><Save className="h-3 w-3" /> Salvar</Button>
+                      <Button onClick={() => setEditingPhotoId(null)} variant="ghost" size="sm">Cancelar</Button>
+                    </div>
+                  ) : (
+                    <p className="text-white text-sm font-semibold">{photo.caption || "Sem legenda"}</p>
+                  )}
+                  <div className="flex gap-2 self-end">
+                    <Button onClick={() => handleEditCaption(photo)} size="icon" variant="outline" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
+                    <Button onClick={() => handleDeletePhoto(photo.id)} size="icon" variant="destructive" className="h-8 w-8"><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>
