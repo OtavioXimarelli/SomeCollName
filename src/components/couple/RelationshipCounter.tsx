@@ -89,25 +89,23 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
 
 
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle className="flex items-center text-2xl font-headline text-fuchsia-700">
-          <CalendarDays className="mr-3 h-8 w-8 text-fuchsia-500" /> Nossa Jornada Até Aqui
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
+    <div className="w-full">
+      <div className="flex flex-col items-center">
+        <h2 className="flex items-center text-lg font-headline text-fuchsia-700 mb-4 gap-2">
+          <CalendarDays className="h-6 w-6 text-fuchsia-500" /> Nossa Jornada Até Aqui
+        </h2>
+        <div className="flex flex-wrap justify-center gap-3 mb-2">
           {Object.entries(duration).map(([unit, value]) => (
-            <div key={unit} className="bg-pink-100 p-4 rounded-lg shadow">
-              <div className="text-4xl font-headline text-fuchsia-700">{value}</div>
-              <div className="text-sm font-body text-rose-500 capitalize">{unit}</div>
+            <div key={unit} className="flex flex-col items-center px-3 py-2 bg-white/80 border-2 border-fuchsia-200 rounded-lg shadow-sm min-w-[60px]">
+              <span className="text-2xl font-bold text-fuchsia-700 leading-tight">{value}</span>
+              <span className="text-xs text-fuchsia-500 uppercase tracking-wide mt-1">{unit.charAt(0).toUpperCase() + unit.slice(1)}</span>
             </div>
           ))}
         </div>
-        <p className="text-sm text-rose-500 mt-4 text-center">
+        <p className="text-xs text-rose-500 mt-2 text-center">
           Iniciado em: {startDate.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
