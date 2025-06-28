@@ -9,7 +9,7 @@ const Card = React.forwardRef<
     ref={ref}
     className={cn(
       // Fundo translúcido, borda rosa, sombra fúcsia, transição suave
-      "rounded-2xl border border-pink-300 bg-white/70 backdrop-blur-md shadow-lg shadow-fuchsia-200/60 transition-all duration-300",
+      "rounded-2xl border border-pink-300 bg-white/70 backdrop-blur-md shadow-md shadow-fuchsia-100/40 transition-all duration-200 will-change-transform will-change-opacity",
       className
     )}
     {...props}
