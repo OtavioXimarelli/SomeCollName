@@ -56,7 +56,12 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
             <p className="text-sm text-rose-600 truncate">{currentTrack.artist}</p>
           </div>
         </div>
-        <button onClick={() => setIsPlaylistVisible(!isPlaylistVisible)} className="text-fuchsia-600 hover:text-fuchsia-800 p-2">
+        <button 
+          onClick={() => setIsPlaylistVisible(!isPlaylistVisible)} 
+          className="text-fuchsia-600 hover:text-fuchsia-800 p-2"
+          aria-label={isPlaylistVisible ? "Hide playlist" : "Show playlist"}
+          title={isPlaylistVisible ? "Hide playlist" : "Show playlist"}
+        >
           <ListMusic className="h-6 w-6" />
         </button>
       </CardHeader>
@@ -65,7 +70,7 @@ export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerP
         <iframe
           title={`Spotify Player: ${currentTrack.title} by ${currentTrack.artist}`}
           key={currentTrack.id} // Re-render iframe when track changes
-          style={{ borderRadius: "0 0 12px 12px" }}
+          className="rounded-b-xl"
           src={spotifyEmbedUrl}
           width="100%"
           height="152" // Standard compact player height
