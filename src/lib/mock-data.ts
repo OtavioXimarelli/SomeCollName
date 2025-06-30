@@ -8,9 +8,9 @@ const defaultPhotos: Photo[] = [
 ];
 
 const defaultPlaylist: Song[] = [
-  { id: '1', title: 'Coffee Shop Lofi', artist: 'Various Artists', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
-  { id: '2', title: 'Chillhop Essentials', artist: 'Chillhop Music', url: 'https://www.youtube.com/watch?v=5qap5aO4i9A' },
-  { id: '3', title: 'Epic Cinematic Music', artist: 'ャAlexis', url: 'https://www.youtube.com/watch?v=DWcJFNfaw9c' },
+    { id: '1', title: 'Lover', artist: 'Taylor Swift', spotifyTrackId: '1dGr1c8CrMLDpV6mPbImSI', albumCoverUrl: 'https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647' },
+    { id: '2', title: 'Perfect', artist: 'Ed Sheeran', spotifyTrackId: '0tgVpDi06FyKpA1z0VMD4v', albumCoverUrl: 'https://i.scdn.co/image/ab67616d0000b27333f85b31956360650555a315' },
+    { id: '3', title: 'A Thousand Years', artist: 'Christina Perri', spotifyTrackId: '6lanRgr6wXibZr8KgzXxBl', albumCoverUrl: 'https://i.scdn.co/image/ab67616d0000b273a7a25424282a2673795a87aa' },
 ];
 
 // Simulating a "database"
@@ -45,6 +45,7 @@ export const updateCoupleData = async (id: string, data: Partial<CoupleData>): P
 // Initial data for a new couple space
 export const getInitialCoupleData = (id: string): CoupleData => ({
   id,
+  coupleName: 'Novo Casal',
   startDate: new Date().toISOString(),
   photos: [],
   playlist: defaultPlaylist.slice(0,1), // Start with one default song
