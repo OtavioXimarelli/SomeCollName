@@ -1,6 +1,6 @@
 "use client";
 
-import type { CoupleData, Photo, Song } from '@/types';
+import type { CoupleData, Photo } from '@/types';
 import { useState, useEffect } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

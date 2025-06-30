@@ -12,7 +12,7 @@ interface MusicPlayerProps {
   autoplay?: boolean;
 }
 
-export default function MusicPlayer({ playlist, autoplay = false }: MusicPlayerProps) {
+export default function MusicPlayer({ playlist, autoplay: _autoplay = false }: MusicPlayerProps) {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaylistVisible, setIsPlaylistVisible] = useState(true);
 

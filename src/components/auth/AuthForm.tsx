@@ -62,7 +62,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
     try {
       await signIn(data.email, data.password);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       // Error is handled in the context
     }
   };
@@ -71,7 +71,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
     try {
       await signUp(data.email, data.password, data.displayName);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       // Error is handled in the context
     }
   };
@@ -80,7 +80,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
     try {
       await signInWithGoogle();
       onSuccess?.();
-    } catch (error) {
+    } catch {
       // Error is handled in the context
     }
   };

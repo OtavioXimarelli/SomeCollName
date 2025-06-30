@@ -3,7 +3,6 @@
 import type { Photo } from '@/types';
 import Image from 'next/image';
 import { ImageIcon, Heart, Calendar, Expand } from 'lucide-react';
-import { useState } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
@@ -21,7 +20,6 @@ const getAnimationDelayClass = (index: number): string => {
 };
 
 export default function PhotoGallery({ photos, coupleName }: PhotoGalleryProps) {
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
 
   if (!photos || photos.length === 0) {
     return (

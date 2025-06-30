@@ -47,9 +47,12 @@ async function getSpotifyAccessToken(): Promise<string> {
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { trackId: string } }) {
+export async function GET(
+  request: NextRequest, 
+  { params }: { params: Promise<{ trackId: string }> }
+) {
   try {
-    const { trackId } = params;
+    const { trackId } = await params;
 
     if (!trackId) {
       return NextResponse.json({ error: 'Track ID is required' }, { status: 400 });
