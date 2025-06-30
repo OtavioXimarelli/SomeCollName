@@ -10,7 +10,7 @@ export const uploadPhoto = async (
   file: File, 
   userId: string, 
   coupleId: string,
-  onProgress?: UploadProgressCallback
+  _onProgress?: UploadProgressCallback
 ): Promise<string> => {
   // Validate file type
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { QrCode, Music2 } from 'lucide-react';
 import Image from 'next/image';
 

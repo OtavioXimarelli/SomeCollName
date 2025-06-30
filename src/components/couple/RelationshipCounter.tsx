@@ -55,7 +55,7 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
     const intervalId = setInterval(calculateDuration, 1000); // Atualiza a cada segundo
 
     return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
-  }, [startDateString]);
+  }, [startDateString, startDate]);
 
   if (!duration) {
     return (

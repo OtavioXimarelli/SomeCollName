@@ -117,7 +117,7 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
       } else {
         toast({ title: "Sem sugestões", description: "A IA não conseguiu gerar legendas. Tente outra foto ou contexto." });
       }
-    } catch (error) {
+    } catch {
       toast({ title: "Sugestão falhou", description: "Não foi possível obter sugestões de legenda da IA.", variant: "destructive" });
     } finally {
       setIsSuggesting(false);
