@@ -17,7 +17,12 @@
     "audit": "npm audit && npm audit fix",
     "deploy": "./deploy.sh",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "firebase:emulators": "firebase emulators:start",
+    "firebase:deploy": "firebase deploy",
+    "firebase:deploy:rules": "firebase deploy --only firestore:rules,storage:rules",
+    "setup:env": "./setup-env.sh",
+    "setup:firebase": "./setup-firebase.sh"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",

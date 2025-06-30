@@ -101,6 +101,64 @@ A beautiful and modern couples' memory-sharing application built with Next.js, T
 5. **Open your browser**
    Navigate to `http://localhost:9002`
 
+## 🔥 Firebase Setup
+
+This application uses Firebase for authentication, database, and file storage. Follow these steps to set up your Firebase project:
+
+### Quick Setup
+
+1. **Run the automated setup script:**
+   ```bash
+   ./setup-firebase.sh
+   ```
+
+2. **Configure your environment variables:**
+   ```bash
+   ./setup-env.sh
+   ```
+
+### Manual Setup
+
+If you prefer to set up manually, follow the detailed guide in [`docs/firebase-setup.md`](./docs/firebase-setup.md).
+
+### Required Firebase Services
+
+- **Authentication**: Email/Password authentication
+- **Firestore**: NoSQL database for storing user and couple data
+- **Storage**: File storage for photos and images
+- **Hosting** (optional): For deploying the application
+
+### Environment Variables
+
+The following environment variables are required:
+
+```bash
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=yourproject.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=yourproject
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=yourproject.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef
+
+# Spotify API
+NEXT_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+```
+
+### Firebase CLI Commands
+
+```bash
+# Deploy security rules only
+npm run firebase:deploy:rules
+
+# Start Firebase emulators for local development
+npm run firebase:emulators
+
+# Deploy entire project to Firebase
+npm run firebase:deploy
+```
+
 ## 🏗️ Architecture
 
 ### **Tech Stack**
