@@ -18,6 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 import { saveCoupleDetailsAction, updatePlaylistAction } from '@/lib/actions';
 import PhotoUploadForm from './PhotoUploadForm';
 import QRCodeDisplay from './QRCodeDisplay';
+import SpotifyTrackPicker from './SpotifyTrackPicker';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Image from 'next/image';
 
 const generalSettingsSchema = z.object({
@@ -30,7 +32,8 @@ const musicSettingsSchema = z.object({
   songs: z.array(z.object({
     title: z.string().min(1, "Título da música é obrigatório"),
     artist: z.string().min(1, "Nome do artista é obrigatório"),
-    url: z.string().url("Deve ser uma URL válida (ex: link do YouTube)").min(1, "URL da música é obrigatória"),
+    spotifyTrackId: z.string().min(1, "ID da música do Spotify é obrigatório"),
+    albumCoverUrl: z.string().url("URL da capa do álbum inválida").optional(),
   })).max(10, "A playlist pode ter no máximo 10 músicas."),
 });
 type MusicSettingsFormValues = z.infer<typeof musicSettingsSchema>;
@@ -66,13 +69,13 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
   const musicForm = useForm<MusicSettingsFormValues>({
     resolver: zodResolver(musicSettingsSchema),
     defaultValues: {
-      songs: coupleData.playlist.map(s => ({ ...s })) || [],
+      songs: coupleData.playlist.map(s => ({ ...s, albumCoverUrl: s.albumCoverUrl || '' })) || [],
     },
   });
-
+  
   useEffect(() => {
     musicForm.reset({
-      songs: coupleData.playlist.map(s => ({ ...s })) || [],
+      songs: coupleData.playlist.map(s => ({ ...s, albumCoverUrl: s.albumCoverUrl || '' })) || [],
     });
   }, [coupleData.playlist, musicForm]);
 
@@ -117,32 +120,33 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
   const mainSong = coupleData.playlist?.[0];
 
   return (
-    <div className="flex justify-center items-start min-h-[90vh] p-2 sm:p-4 bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50">
-      <Card className="w-full max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto p-4 sm:p-8 flex flex-col gap-8 rounded-3xl bg-white/90 border-2 border-fuchsia-100 shadow-xl">
-        <div className="grid md:grid-cols-2 gap-6 items-start">
-          {mainSong && (
-            <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/80 p-4 flex items-center gap-3 shadow-sm">
-              <Music2 className="text-fuchsia-500 w-7 h-7 flex-shrink-0" />
-              <div className="flex flex-col overflow-hidden">
-                <span className="font-headline text-fuchsia-700 text-base truncate font-semibold">{mainSong.title}</span>
-                <span className="text-xs text-rose-500 truncate">{mainSong.artist}</span>
+    <ProtectedRoute>
+      <div className="flex justify-center items-start min-h-[90vh] p-2 sm:p-4 bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50">
+        <Card className="w-full max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto p-4 sm:p-8 flex flex-col gap-8 rounded-3xl bg-white/90 border-2 border-fuchsia-100 shadow-xl">
+          <div className="grid md:grid-cols-2 gap-6 items-start">
+            {mainSong && (
+              <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/80 p-4 flex items-center gap-3 shadow-sm">
+                <Music2 className="text-fuchsia-500 w-7 h-7 flex-shrink-0" />
+                <div className="flex flex-col overflow-hidden">
+                  <span className="font-headline text-fuchsia-700 text-base truncate font-semibold">{mainSong.title}</span>
+                  <span className="text-xs text-rose-500 truncate">{mainSong.artist}</span>
+                </div>
               </div>
-            </div>
-          )}
-          {mainPhoto && (
-            <div className="rounded-2xl overflow-hidden border-2 border-fuchsia-200 bg-white flex items-center justify-center aspect-[4/3] max-h-60 mx-auto shadow-md w-full">
-              <Image src={mainPhoto} alt="Foto principal do casal" width={320} height={240} className="object-cover w-full h-full" />
-            </div>
-          )}
-        </div>
+            )}
+            {mainPhoto && (
+              <div className="rounded-2xl overflow-hidden border-2 border-fuchsia-200 bg-white flex items-center justify-center aspect-[4/3] max-h-60 mx-auto shadow-md w-full">
+                <Image src={mainPhoto} alt="Foto principal do casal" width={320} height={240} className="object-cover w-full h-full" />
+              </div>
+            )}
+          </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 mb-6 bg-pink-100/60 p-2 rounded-xl">
-            <TabsTrigger value="general" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><Settings className="h-5 w-5" />Geral</TabsTrigger>
-            <TabsTrigger value="photos" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><ImageIcon className="h-5 w-5" />Fotos</TabsTrigger>
-            <TabsTrigger value="music" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><Music2Icon className="h-5 w-5" />Música</TabsTrigger>
-            <TabsTrigger value="share" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><QrCodeIcon className="h-5 w-5" />Compartilhar</TabsTrigger>
-          </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 mb-6 bg-pink-100/60 p-2 rounded-xl">
+              <TabsTrigger value="general" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><Settings className="h-5 w-5" />Geral</TabsTrigger>
+              <TabsTrigger value="photos" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><ImageIcon className="h-5 w-5" />Fotos</TabsTrigger>
+              <TabsTrigger value="music" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><Music2Icon className="h-5 w-5" />Música</TabsTrigger>
+              <TabsTrigger value="share" className="text-fuchsia-700 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-fuchsia-800 rounded-lg py-2.5 font-semibold flex items-center justify-center gap-2"><QrCodeIcon className="h-5 w-5" />Compartilhar</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="general">
             <Card className="bg-fuchsia-50/30 border-fuchsia-100 p-2">
@@ -202,69 +206,70 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
           <TabsContent value="music">
             <Card className="bg-fuchsia-50/30 border-fuchsia-100 p-2">
               <CardHeader>
-                <CardTitle className="font-headline text-2xl text-fuchsia-700">Playlist de Música</CardTitle>
-                <CardDescription className="text-rose-500">Gerencie as músicas para o seu tocador. Use URLs de vídeos do YouTube.</CardDescription>
+                <CardTitle className="font-headline text-2xl text-fuchsia-700">Playlist do Spotify</CardTitle>
+                <CardDescription className="text-rose-500">Busque e adicione suas músicas favoritas do Spotify. Crie uma trilha sonora especial para vocês dois.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={musicForm.handleSubmit(handleMusicSettingsSubmit)} className="space-y-6">
-                  {songsFields.map((song, index) => (
-                    <Card key={index} className="p-4 space-y-3 bg-muted/30">
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-semibold text-primary-foreground">Música #{index + 1}</h4>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => {
-                          const currentSongs = musicForm.getValues('songs');
-                          currentSongs.splice(index, 1);
-                          musicForm.setValue('songs', currentSongs, { shouldValidate: true });
-                        }}
-                          disabled={songsFields.length <= 1 && index === 0 && songsFields[0]?.title === "" && songsFields[0]?.artist === "" && songsFields[0]?.url === ""}
-                          className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div>
-                        <Label htmlFor={`songs.${index}.title`} className="text-sm">Título</Label>
-                        <Input id={`songs.${index}.title`} {...musicForm.register(`songs.${index}.title`)} placeholder="Título da Música" className="mt-1" />
-                        {musicForm.formState.errors.songs?.[index]?.title && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.title?.message}</p>}
-                      </div>
-                      <div>
-                        <Label htmlFor={`songs.${index}.artist`} className="text-sm">Artista</Label>
-                        <Input id={`songs.${index}.artist`} {...musicForm.register(`songs.${index}.artist`)} placeholder="Nome do Artista" className="mt-1" />
-                        {musicForm.formState.errors.songs?.[index]?.artist && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.artist?.message}</p>}
-                      </div>
-                      <div>
-                        <Label htmlFor={`songs.${index}.url`} className="text-sm">URL da Música (YouTube)</Label>
-                        <Input id={`songs.${index}.url`} type="url" {...musicForm.register(`songs.${index}.url`)} placeholder="https://www.youtube.com/watch?v=..." className="mt-1" />
-                        {musicForm.formState.errors.songs?.[index]?.url && <p className="text-sm text-destructive mt-1">{musicForm.formState.errors.songs[index]?.url?.message}</p>}
-                      </div>
-                    </Card>
-                  ))}
-                  <Button type="button" variant="outline" onClick={() => {
-                    if (songsFields.length < 10) {
-                      const currentSongs = musicForm.getValues('songs');
-                      musicForm.setValue('songs', [...currentSongs, { title: "", artist: "", url: "" }], { shouldValidate: true });
-                    } else {
-                      toast({ title: "Playlist Cheia", description: "Você pode adicionar no máximo 10 músicas.", variant: "destructive" });
-                    }
+              <CardContent className="space-y-6">
+                <SpotifyTrackPicker 
+                  onTrackSelect={(track) => {
+                    const currentSongs = musicForm.getValues('songs');
+                    musicForm.setValue('songs', [...currentSongs, track], { shouldValidate: true });
                   }}
-                    disabled={songsFields.length >= 10}
-                  >
-                    Adicionar Música
-                  </Button>
-                  <Button type="submit" disabled={musicForm.formState.isSubmitting} className="w-full sm:w-auto">
-                    {musicForm.formState.isSubmitting ? "Salvando Playlist..." : <><Save className="mr-2 h-4 w-4" /> Salvar Playlist</>}
-                  </Button>
-                </form>
+                  selectedTracks={coupleData.playlist} // Use the actual playlist with IDs
+                  maxTracks={10}
+                />
+                
+                {songsFields.length > 0 && (
+                  <form onSubmit={musicForm.handleSubmit(handleMusicSettingsSubmit)} className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-fuchsia-700">Sua Playlist</h3>
+                      {songsFields.map((song, index) => (
+                        <Card key={index} className="p-4 space-y-3 bg-white/50">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-3 flex-grow">
+                              {song.albumCoverUrl && (
+                                <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                  <Image src={song.albumCoverUrl} alt="Album cover" width={48} height={48} className="object-cover" />
+                                </div>
+                              )}
+                              <div>
+                                <h4 className="font-semibold text-gray-900">{song.title}</h4>
+                                <p className="text-sm text-gray-600">{song.artist}</p>
+                              </div>
+                            </div>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => {
+                                const currentSongs = musicForm.getValues('songs');
+                                currentSongs.splice(index, 1);
+                                musicForm.setValue('songs', currentSongs, { shouldValidate: true });
+                              }}
+                              className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                    <Button type="submit" disabled={musicForm.formState.isSubmitting} className="w-full sm:w-auto">
+                      {musicForm.formState.isSubmitting ? "Salvando Playlist..." : <><Save className="mr-2 h-4 w-4" /> Salvar Playlist</>}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="share">
-            <QRCodeDisplay couplePageId={coupleData.id} couplePhotoUrl={mainPhoto} musicTitle={mainSong?.title} musicArtist={mainSong?.artist} musicUrl={mainSong?.url} />
+            <QRCodeDisplay couplePageId={coupleData.id} couplePhotoUrl={mainPhoto} musicTitle={mainSong?.title} musicArtist={mainSong?.artist} spotifyTrackId={mainSong?.spotifyTrackId} />
           </TabsContent>
         </Tabs>
       </Card>
     </div>
+    </ProtectedRoute>
   );
 }
 

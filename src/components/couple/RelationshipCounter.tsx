@@ -36,17 +36,17 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
         return;
       }
 
-      let years = differenceInYears(now, startDate);
-      let monthsDate = addYears(startDate, years);
-      let months = differenceInMonths(now, monthsDate);
-      let daysDate = addMonths(monthsDate, months);
-      let days = differenceInDays(now, daysDate);
-      let hoursDate = addDays(daysDate, days);
-      let hours = differenceInHours(now, hoursDate);
-      let minutesDate = addHours(hoursDate, hours);
-      let minutes = differenceInMinutes(now, minutesDate);
-      let secondsDate = addMinutes(minutesDate, minutes);
-      let seconds = differenceInSeconds(now, secondsDate);
+      const years = differenceInYears(now, startDate);
+      const monthsDate = addYears(startDate, years);
+      const months = differenceInMonths(now, monthsDate);
+      const daysDate = addMonths(monthsDate, months);
+      const days = differenceInDays(now, daysDate);
+      const hoursDate = addDays(daysDate, days);
+      const hours = differenceInHours(now, hoursDate);
+      const minutesDate = addHours(hoursDate, hours);
+      const minutes = differenceInMinutes(now, minutesDate);
+      const secondsDate = addMinutes(minutesDate, minutes);
+      const seconds = differenceInSeconds(now, secondsDate);
       
       setDuration({ years, months, days, hours, minutes, seconds });
     };

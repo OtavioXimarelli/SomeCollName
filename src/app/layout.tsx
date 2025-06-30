@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import AppHeader from '@/components/layout/AppHeader';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export const metadata: Metadata = {
   title: 'Laço Eterno',
@@ -22,11 +24,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Belleza&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
-        <AppHeader />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Toaster />
+        <ErrorBoundary>
+          <AuthProvider>
+            <AppHeader />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Toaster />
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

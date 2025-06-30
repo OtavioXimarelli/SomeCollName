@@ -11,10 +11,10 @@ interface QRCodeDisplayProps {
   couplePhotoUrl?: string;
   musicTitle?: string;
   musicArtist?: string;
-  musicUrl?: string;
+  spotifyTrackId?: string;
 }
 
-export default function QRCodeDisplay({ couplePageId, couplePhotoUrl, musicTitle, musicArtist, musicUrl }: QRCodeDisplayProps) {
+export default function QRCodeDisplay({ couplePageId, couplePhotoUrl, musicTitle, musicArtist, spotifyTrackId }: QRCodeDisplayProps) {
   const [pageUrl, setPageUrl] = useState('');
 
   useEffect(() => {
@@ -55,8 +55,8 @@ export default function QRCodeDisplay({ couplePageId, couplePhotoUrl, musicTitle
             <div className="flex flex-col overflow-hidden">
               <span className="font-headline text-fuchsia-700 text-base truncate">{musicTitle}</span>
               <span className="text-xs text-rose-500 truncate">{musicArtist}</span>
-              {musicUrl && (
-                <a href={musicUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-fuchsia-600 underline mt-1">Ouvir</a>
+              {spotifyTrackId && (
+                <a href={`https://open.spotify.com/track/${spotifyTrackId}`} target="_blank" rel="noopener noreferrer" className="text-xs text-fuchsia-600 underline mt-1">Ouvir no Spotify</a>
               )}
             </div>
           </div>

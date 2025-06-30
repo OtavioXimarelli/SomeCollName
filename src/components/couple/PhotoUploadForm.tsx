@@ -9,11 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { addPhotoAction, deletePhotoAction, updatePhotoCaptionAction, suggestPhotoCaptionAction } from '@/lib/actions';
+import { uploadPhoto, validateImageFile } from '@/lib/storage';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Photo } from '@/types';
 import { useState } from 'react';
-import { ImagePlus, Trash2, Edit, Save, Sparkles, Loader2 } from 'lucide-react';
+import { ImagePlus, Trash2, Edit, Save, Sparkles, Loader2, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
@@ -41,11 +44,14 @@ interface PhotoUploadFormProps {
 
 export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListChange }: PhotoUploadFormProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [suggestedCaptions, setSuggestedCaptions] = useState<string[]>([]);
   const [selectedPhotoPreview, setSelectedPhotoPreview] = useState<string | null>(null);
   const [manualCaption, setManualCaption] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [editingCaption, setEditingCaption] = useState('');
@@ -61,25 +67,48 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file
+      const validation = validateImageFile(file);
+      if (!validation.isValid) {
+        toast({
+          title: "Arquivo inválido",
+          description: validation.error,
+          variant: "destructive"
+        });
+        event.target.value = '';
+        return;
+      }
+
+      setSelectedFile(file);
       setSelectedPhotoPreview(URL.createObjectURL(file));
       setSuggestedCaptions([]);
       form.setValue('captionChoice', '');
       setManualCaption('');
     } else {
+      setSelectedFile(null);
       setSelectedPhotoPreview(null);
     }
   };
 
+  const handleRemoveSelectedFile = () => {
+    setSelectedFile(null);
+    setSelectedPhotoPreview(null);
+    setSuggestedCaptions([]);
+    form.setValue('captionChoice', '');
+    setManualCaption('');
+    const fileInput = document.getElementById('photo-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
   const handleSuggestCaptions = async () => {
-    const photoFile = form.getValues("photoFile")?.[0];
-    if (!photoFile) {
+    if (!selectedFile) {
       toast({ title: "Nenhuma foto selecionada", description: "Selecione uma foto primeiro.", variant: "destructive" });
       return;
     }
     setIsSuggesting(true);
     setSuggestedCaptions([]);
     try {
-      const photoDataUri = await fileToDataUri(photoFile);
+      const photoDataUri = await fileToDataUri(selectedFile);
       const context = form.getValues("context") || "";
       const result = await suggestPhotoCaptionAction({ photoDataUri, context });
       if (result.captions.length > 0) {
@@ -96,18 +125,28 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
   };
 
   const onSubmit: SubmitHandler<PhotoUploadFormValues> = async (data) => {
+    if (!selectedFile || !user) return;
+    
     setIsUploading(true);
+    setUploadProgress(0);
+    
     try {
-      const photoFile = data.photoFile[0];
+      // Upload to Firebase Storage
+      const photoUrl = await uploadPhoto(selectedFile, user.uid, coupleId, setUploadProgress);
+      
       const finalCaption = suggestedCaptions.length > 0 ? data.captionChoice : manualCaption;
-      const result = await addPhotoAction(coupleId, { url: `https://placehold.co/400x300.png?text=${encodeURIComponent(photoFile.name)}`, caption: finalCaption || "" });
+      const result = await addPhotoAction(coupleId, { 
+        url: photoUrl, 
+        caption: finalCaption || "",
+        dataAiHint: data.context || ""
+      });
+      
       if (result && result.photos) {
         onPhotoListChange(result.photos);
         toast({ title: "Foto adicionada!", description: "Sua nova memória foi salva." });
         form.reset();
-        setSelectedPhotoPreview(null);
-        setSuggestedCaptions([]);
-        setManualCaption('');
+        handleRemoveSelectedFile();
+        setUploadProgress(0);
       } else {
         throw new Error("Falha ao adicionar foto.");
       }
@@ -115,6 +154,7 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
       toast({ title: "Falha no upload", description: (error as Error).message || "Não foi possível salvar a foto.", variant: "destructive" });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -227,9 +267,30 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
               </div>
             )}
 
-            <Button type="submit" disabled={isUploading} className="w-full sm:w-auto gap-2">
-              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar Foto
-            </Button>
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Upload className="h-4 w-4 text-fuchsia-600" />
+                  <span className="text-sm text-fuchsia-700 font-medium">Fazendo upload...</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+                <p className="text-xs text-fuchsia-600">{uploadProgress}% concluído</p>
+              </div>
+            )}
+
+            <div className="flex gap-4">
+              <Button type="submit" disabled={isUploading || !selectedPhotoPreview} className="flex-1">
+                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                {isUploading ? "Salvando..." : "Salvar Foto"}
+              </Button>
+              
+              {selectedPhotoPreview && (
+                <Button type="button" variant="outline" onClick={handleRemoveSelectedFile} disabled={isUploading}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
       </Card>
