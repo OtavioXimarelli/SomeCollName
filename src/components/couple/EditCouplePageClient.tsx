@@ -19,6 +19,7 @@ import { saveCoupleDetailsAction, updatePlaylistAction } from '@/lib/actions';
 import PhotoUploadForm from './PhotoUploadForm';
 import QRCodeDisplay from './QRCodeDisplay';
 import SpotifyTrackPicker from './SpotifyTrackPicker';
+import { SpotifyErrorBoundary } from './SpotifyErrorBoundary';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Image from 'next/image';
 
@@ -210,14 +211,16 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
                 <CardDescription className="text-rose-500">Busque e adicione suas músicas favoritas do Spotify. Crie uma trilha sonora especial para vocês dois.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <SpotifyTrackPicker 
-                  onTrackSelect={(track) => {
-                    const currentSongs = musicForm.getValues('songs');
-                    musicForm.setValue('songs', [...currentSongs, track], { shouldValidate: true });
-                  }}
-                  selectedTracks={coupleData.playlist} // Use the actual playlist with IDs
-                  maxTracks={10}
-                />
+                <SpotifyErrorBoundary>
+                  <SpotifyTrackPicker 
+                    onTrackSelect={(track) => {
+                      const currentSongs = musicForm.getValues('songs');
+                      musicForm.setValue('songs', [...currentSongs, track], { shouldValidate: true });
+                    }}
+                    selectedTracks={coupleData.playlist} // Use the actual playlist with IDs
+                    maxTracks={10}
+                  />
+                </SpotifyErrorBoundary>
                 
                 {songsFields.length > 0 && (
                   <form onSubmit={musicForm.handleSubmit(handleMusicSettingsSubmit)} className="space-y-6">

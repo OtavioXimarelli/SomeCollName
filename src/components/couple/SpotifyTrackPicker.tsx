@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Search, Music, Play, Check, Loader2, ExternalLink } from 'lucide-react';
+import { Search, Music, Play, Check, Loader2, ExternalLink, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useSpotifySearch, type SpotifyTrack } from '@/lib/spotify';
 import type { Song } from '@/types';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface SpotifyTrackPickerProps {
   onTrackSelect: (track: Song) => void;
@@ -39,21 +40,25 @@ export default function SpotifyTrackPicker({
   }, [debouncedSearch, search, clearResults]);
 
   const handleTrackSelect = (spotifyTrack: SpotifyTrack) => {
-    const song: Song = {
-      id: spotifyTrack.id,
-      title: spotifyTrack.name,
-      artist: spotifyTrack.artists.map(a => a.name).join(', '),
-      spotifyTrackId: spotifyTrack.id,
-      albumCoverUrl: spotifyTrack.album.images[0]?.url || undefined,
-    };
+    try {
+      const song: Song = {
+        id: spotifyTrack.id,
+        title: spotifyTrack.name,
+        artist: spotifyTrack.artists.map(a => a.name).join(', '),
+        spotifyTrackId: spotifyTrack.id,
+        albumCoverUrl: spotifyTrack.album.images[0]?.url || undefined,
+      };
 
-    onTrackSelect(song);
-    setSearchQuery('');
-    clearResults();
+      onTrackSelect(song);
+      setSearchQuery(''); // Clear search after selection
+      clearResults();
+    } catch (error) {
+      console.error('Error selecting track:', error);
+    }
   };
 
   const isTrackSelected = (trackId: string) => {
-    return selectedTracks.some(track => track.spotifyTrackId === trackId);
+    return selectedTracks.some((track: Song) => track.spotifyTrackId === trackId);
   };
 
   const isMaxTracksReached = selectedTracks.length >= maxTracks;
@@ -88,9 +93,25 @@ export default function SpotifyTrackPicker({
       </div>
 
       {searchError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">{searchError}</p>
-        </div>
+        <Alert className="border-red-200 bg-red-50">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            <div className="space-y-2">
+              <p className="font-semibold">Erro na busca do Spotify</p>
+              <p className="text-sm">{searchError}</p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => search(searchQuery)}
+                className="text-red-700 border-red-300 hover:bg-red-100"
+                disabled={!searchQuery.trim()}
+              >
+                <Search className="h-3 w-3 mr-1" />
+                Tentar Novamente
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
       )}
 
       {searchResults.length > 0 && (

@@ -1,8 +1,5 @@
 import { useState } from 'react';
 
-const SPOTIFY_CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
-const SPOTIFY_CLIENT_SECRET = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET;
-
 // Spotify Web API types
 export interface SpotifyTrack {
   id: string;
@@ -19,79 +16,45 @@ export interface SpotifyTrack {
 }
 
 export interface SpotifySearchResponse {
-  tracks: {
-    items: SpotifyTrack[];
-    total: number;
-  };
+  tracks: SpotifyTrack[];
+  total: number;
 }
 
-// Get Spotify access token using client credentials flow
-export const getSpotifyAccessToken = async (): Promise<string> => {
-  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
-    throw new Error('Spotify credentials not configured');
-  }
-
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
-    },
-    body: 'grant_type=client_credentials',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to get Spotify access token');
-  }
-
-  const data = await response.json();
-  return data.access_token;
-};
-
-// Search for tracks on Spotify
+// Search for tracks using our API route
 export const searchSpotifyTracks = async (query: string, limit: number = 20): Promise<SpotifyTrack[]> => {
   if (!query.trim()) return [];
 
   try {
-    const token = await getSpotifyAccessToken();
-    
     const searchParams = new URLSearchParams({
       q: query,
-      type: 'track',
       limit: limit.toString(),
     });
 
-    const response = await fetch(`https://api.spotify.com/v1/search?${searchParams}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(`/api/spotify/search?${searchParams}`);
 
     if (!response.ok) {
-      throw new Error('Failed to search Spotify tracks');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to search Spotify tracks');
     }
 
     const data: SpotifySearchResponse = await response.json();
-    return data.tracks.items;
+    return data.tracks;
   } catch (error) {
     console.error('Spotify search error:', error);
-    return [];
+    throw error; // Re-throw to handle in the hook
   }
 };
 
-// Get track details by ID
+// Get track details by ID using our API route
 export const getSpotifyTrack = async (trackId: string): Promise<SpotifyTrack | null> => {
   try {
-    const token = await getSpotifyAccessToken();
-    
-    const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(`/api/spotify/track/${trackId}`);
 
     if (!response.ok) {
-      return null;
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch Spotify track');
     }
 
     return await response.json();
@@ -131,6 +94,7 @@ export const useSpotifySearch = () => {
   const search = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
+      setSearchError(null);
       return;
     }
 
@@ -141,7 +105,8 @@ export const useSpotifySearch = () => {
       const results = await searchSpotifyTracks(query);
       setSearchResults(results);
     } catch (error) {
-      setSearchError('Erro ao buscar músicas. Tente novamente.');
+      console.error('Search error:', error);
+      setSearchError(error instanceof Error ? error.message : 'Erro ao buscar músicas. Tente novamente.');
       setSearchResults([]);
     } finally {
       setIsSearching(false);
