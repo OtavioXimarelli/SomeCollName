@@ -14,6 +14,12 @@ interface PhotoGalleryProps {
   coupleName?: string;
 }
 
+// Utility function to get animation delay class
+const getAnimationDelayClass = (index: number): string => {
+  const delay = Math.min(index * 100, 1500); // Cap at 1500ms
+  return `animate-delay-${delay}`;
+};
+
 export default function PhotoGallery({ photos, coupleName }: PhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
 
@@ -49,7 +55,9 @@ export default function PhotoGallery({ photos, coupleName }: PhotoGalleryProps) 
         {photos.map((photo, index) => (
           <Dialog key={photo.id}>
             <DialogTrigger asChild>
-              <div className="group relative overflow-hidden rounded-xl border-2 border-fuchsia-100 bg-white shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer hover-lift animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+              <div 
+                className={`group relative overflow-hidden rounded-xl border-2 border-fuchsia-100 bg-white shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer hover-lift animate-fade-in ${getAnimationDelayClass(index)}`}
+              >
                 <div className="aspect-square relative">
                   <Image
                     src={photo.url}
