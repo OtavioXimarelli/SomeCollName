@@ -23,15 +23,15 @@ export const metadata: Metadata = {
     title: 'Laço Eterno - Sua História de Amor Digital',
     description: 'Crie sua história de amor digital única. Um espaço privado para guardar memórias, celebrar conquistas e crescer juntos.',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
   robots: {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -42,6 +42,8 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="scroll-smooth">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="theme-color" content="#ec4899" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
@@ -52,9 +54,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Belleza&display=swap" 
           rel="stylesheet" 
         />
-        <meta name="theme-color" content="#ec4899" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col bg-gradient-to-br from-pink-50/50 via-rose-50/50 to-fuchsia-50/50">
         <ErrorBoundary>

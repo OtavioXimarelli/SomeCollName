@@ -7,12 +7,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Heart, GalleryVerticalEnd, Music2, Sparkles, LogIn, UserPlus, Star, Camera, Users } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AuthForm from '@/components/auth/AuthForm';
+import { getUserCouple } from '@/lib/firestore-service';
+import type { CoupleData } from '@/types';
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [showAuthForm, setShowAuthForm] = useState(false);
+  const [coupleData, setCoupleData] = useState<CoupleData | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadCoupleData = async () => {
+      if (user && userProfile?.coupleId) {
+        setLoading(true);
+        try {
+          const data = await getUserCouple(user.uid);
+          setCoupleData(data);
+        } catch (error) {
+          console.error('Error loading couple data:', error);
+          // Don't set an error state, just log it and continue
+          // User can still navigate to create page or other functions
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Reset couple data if user doesn't have coupleId
+        setCoupleData(null);
+        setLoading(false);
+      }
+    };
+
+    loadCoupleData();
+  }, [user, userProfile]);
 
   if (showAuthForm && !user) {
     return <AuthForm onSuccess={() => setShowAuthForm(false)} />;
@@ -60,29 +88,61 @@ export default function HomePage() {
           {/* Enhanced Action Buttons */}
           {user ? (
             <div className="flex flex-col items-center space-y-6">
-              <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                <button className="relative uiverse-btn transform hover:scale-105 transition-transform duration-300">
-                  <span className="uiverse-btn-bg">
-                    <span className="uiverse-btn-bg-layers">
-                      <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-1 -purple"></span>
-                      <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-2 -turquoise"></span>
-                      <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-3 -yellow"></span>
-                    </span>
-                  </span>
-                  <span className="uiverse-btn-inner">
-                    <span className="uiverse-btn-inner-static">✨ Crie seu Espaço de Casal</span>
-                    <span className="uiverse-btn-inner-hover">✨ Crie seu Espaço de Casal</span>
-                  </span>
-                  <Link href="/couple/our-story/edit" className="absolute inset-0 z-10" tabIndex={-1} aria-label="Crie seu Espaço de Casal"></Link>
-                </button>
-              </div>
-              <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-md rounded-full border border-pink-200/50 shadow-lg">
-                <Users className="w-5 h-5 text-fuchsia-600" />
-                <p className="text-lg text-fuchsia-700 font-medium">
-                  Bem-vindo de volta, {user.displayName || 'usuário'}! ✨
-                </p>
-              </div>
+              {coupleData ? (
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative group">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    <Link href={`/couple/${coupleData.id}`}>
+                      <button className="relative uiverse-btn transform hover:scale-105 transition-transform duration-300">
+                        <span className="uiverse-btn-bg">
+                          <span className="uiverse-btn-bg-layers">
+                            <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-1 -purple"></span>
+                            <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-2 -turquoise"></span>
+                            <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-3 -yellow"></span>
+                          </span>
+                        </span>
+                        <span className="uiverse-btn-inner">
+                          <span className="uiverse-btn-inner-static">💕 Ver Nosso Espaço</span>
+                          <span className="uiverse-btn-inner-hover">💕 Ver Nosso Espaço</span>
+                        </span>
+                      </button>
+                    </Link>
+                  </div>
+                  <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-md rounded-full border border-pink-200/50 shadow-lg">
+                    <Heart className="w-5 h-5 text-fuchsia-600" />
+                    <p className="text-lg text-fuchsia-700 font-medium">
+                      {coupleData.coupleName} • ID: {coupleData.id.slice(-8)}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative group">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    <Link href="/couple/create">
+                      <button className="relative uiverse-btn transform hover:scale-105 transition-transform duration-300">
+                        <span className="uiverse-btn-bg">
+                          <span className="uiverse-btn-bg-layers">
+                            <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-1 -purple"></span>
+                            <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-2 -turquoise"></span>
+                            <span className="uiverse-btn-bg-layer uiverse-btn-bg-layer-3 -yellow"></span>
+                          </span>
+                        </span>
+                        <span className="uiverse-btn-inner">
+                          <span className="uiverse-btn-inner-static">✨ Crie seu Espaço de Casal</span>
+                          <span className="uiverse-btn-inner-hover">✨ Crie seu Espaço de Casal</span>
+                        </span>
+                      </button>
+                    </Link>
+                  </div>
+                  <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-md rounded-full border border-pink-200/50 shadow-lg">
+                    <Users className="w-5 h-5 text-fuchsia-600" />
+                    <p className="text-lg text-fuchsia-700 font-medium">
+                      Bem-vindo de volta, {user.displayName || 'usuário'}! ✨
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row gap-6 items-center">

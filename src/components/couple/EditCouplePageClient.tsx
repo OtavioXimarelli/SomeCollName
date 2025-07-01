@@ -15,7 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { useToast } from '@/hooks/use-toast';
-import { saveCoupleDetailsAction, updatePlaylistAction } from '@/lib/actions';
+import { updateCoupleData } from '@/lib/firestore-service';
+import { useAuth } from '@/contexts/AuthContext';
 import PhotoUploadForm from './PhotoUploadForm';
 import QRCodeDisplay from './QRCodeDisplay';
 import SpotifyTrackPicker from './SpotifyTrackPicker';
@@ -47,6 +48,7 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
   const [coupleData, setCoupleData] = useState<CoupleData>(initialCoupleData);
   const [activeTab, setActiveTab] = useState("general");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     setCoupleData(initialCoupleData);
@@ -81,32 +83,49 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
   }, [coupleData.playlist, musicForm]);
 
   const handleGeneralSettingsSubmit: SubmitHandler<GeneralSettingsFormValues> = async (data) => {
+    if (!user) {
+      toast({ title: "Erro", description: "Você deve estar logado para fazer alterações.", variant: "destructive" });
+      return;
+    }
+
     try {
-      const updatedData = await saveCoupleDetailsAction(coupleData.id, {
+      await updateCoupleData(coupleData.id, {
         coupleName: data.coupleName,
         startDate: data.startDate.toISOString(),
       });
-      if (updatedData) {
-        setCoupleData(updatedData);
-        toast({ title: "Configurações salvas!", description: "Suas configurações gerais foram atualizadas." });
-      } else {
-        throw new Error("Falha ao salvar configurações gerais.");
-      }
+      
+      setCoupleData(prev => ({
+        ...prev,
+        coupleName: data.coupleName || prev.coupleName,
+        startDate: data.startDate.toISOString(),
+      }));
+      
+      toast({ title: "Configurações salvas!", description: "Suas configurações gerais foram atualizadas." });
     } catch (error) {
       toast({ title: "Falha ao salvar", description: (error as Error).message || "Não foi possível salvar as configurações gerais.", variant: "destructive" });
     }
   };
 
   const handleMusicSettingsSubmit: SubmitHandler<MusicSettingsFormValues> = async (data) => {
+    if (!user) {
+      toast({ title: "Erro", description: "Você deve estar logado para fazer alterações.", variant: "destructive" });
+      return;
+    }
+
     try {
-      const newPlaylist = data.songs.map((song, index) => ({ ...song, id: coupleData.playlist[index]?.id || Date.now().toString() + index }));
-      const updatedData = await updatePlaylistAction(coupleData.id, newPlaylist);
-      if (updatedData) {
-        setCoupleData(updatedData);
-        toast({ title: "Playlist atualizada!", description: "Sua playlist de músicas foi salva." });
-      } else {
-        throw new Error("Falha ao atualizar a playlist.");
-      }
+      const newPlaylist = data.songs.map((song, index) => ({ 
+        ...song, 
+        id: coupleData.playlist[index]?.id || `song_${Date.now()}_${index}`,
+        addedBy: user.uid,
+        addedAt: new Date().toISOString(),
+      }));
+      
+      await updateCoupleData(coupleData.id, {
+        playlist: newPlaylist,
+      });
+      
+      setCoupleData(prev => ({ ...prev, playlist: newPlaylist }));
+      toast({ title: "Playlist atualizada!", description: "Sua playlist de músicas foi salva." });
     } catch (error) {
       toast({ title: "Falha ao salvar", description: (error as Error).message || "Não foi possível salvar a playlist.", variant: "destructive" });
     }
@@ -204,13 +223,13 @@ export default function EditCouplePageClient({ coupleData: initialCoupleData }: 
             <PhotoUploadForm coupleId={coupleData.id} currentPhotos={coupleData.photos} onPhotoListChange={handlePhotoListChange} />
           </TabsContent>
 
-          <TabsContent value="music">
-            <Card className="bg-fuchsia-50/30 border-fuchsia-100 p-2">
+          <TabsContent value="music" className="space-y-0">
+            <Card className="bg-fuchsia-50/30 border-fuchsia-100">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-fuchsia-700">Playlist do Spotify</CardTitle>
                 <CardDescription className="text-rose-500">Busque e adicione suas músicas favoritas do Spotify. Crie uma trilha sonora especial para vocês dois.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-4 sm:p-6">
                 <SpotifyErrorBoundary>
                   <SpotifyTrackPicker 
                     onTrackSelect={(track) => {
