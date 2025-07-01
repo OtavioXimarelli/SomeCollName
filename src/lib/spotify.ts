@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 // Spotify Web API types
 export interface SpotifyTrack {
@@ -91,7 +91,7 @@ export const useSpotifySearch = () => {
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const search = async (query: string) => {
+  const search = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
       setSearchError(null);
@@ -111,12 +111,12 @@ export const useSpotifySearch = () => {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, []);
 
-  const clearResults = () => {
+  const clearResults = useCallback(() => {
     setSearchResults([]);
     setSearchError(null);
-  };
+  }, []);
 
   return {
     search,

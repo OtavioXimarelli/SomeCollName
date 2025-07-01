@@ -55,15 +55,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const profile = await getUserProfile(user.uid);
         setUserProfile(profile);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error fetching user profile:', error);
-        if (error.message === 'Network is offline.') {
-          toast({
-            title: "Erro de Conexão",
-            description: "Não foi possível carregar seu perfil. Verifique sua conexão com a internet.",
-            variant: "destructive"
-          });
-        }
       }
     }
   };
@@ -73,15 +66,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const invitations = await getUserInvitations(user.email);
         setPendingInvitations(invitations);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error fetching invitations:', error);
-        if (error.message === 'Network is offline.') {
-          toast({
-            title: "Erro de Conexão",
-            description: "Não foi possível carregar convites. Verifique sua conexão com a internet.",
-            variant: "destructive"
-          });
-        }
       }
     }
   };
@@ -119,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setPendingInvitations(invitations);
             console.log('onAuthStateChanged: Pending invitations loaded.');
           }
-        } catch (error: any) {
+        } catch (error) {
           console.error('onAuthStateChanged: Error loading user profile:', error);
           // Set a basic profile even if Firestore is offline
           setUserProfile({
@@ -131,13 +117,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             lastActive: new Date().toISOString(),
           });
           console.log('onAuthStateChanged: Fallback user profile set due to error.');
-          if (error.message === 'Network is offline.') {
-            toast({
-              title: "Erro de Conexão Inicial",
-              description: "Não foi possível conectar ao servidor. Algumas funcionalidades podem estar limitadas.",
-              variant: "destructive"
-            });
-          }
         } finally {
           setLoading(false);
           console.log('onAuthStateChanged: Loading set to false.');

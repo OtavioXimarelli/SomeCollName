@@ -1,60 +1,44 @@
-import type { CoupleData, Photo, Song } from '@/types';
+import { getCoupleData as fetchCoupleData, getUserCouple, userCanAccessCouple, updateCoupleData as updateCoupleInFirestore } from './firestore-service';
+import type { CoupleData } from '@/types';
 
-const defaultPhotos: Photo[] = [
-  { id: '1', url: 'https://placehold.co/600x400.png', caption: 'Our first cherished memory together.', uploadedAt: new Date().toISOString(), dataAiHint: "couple beach" },
-  { id: '2', url: 'https://placehold.co/400x600.png', caption: 'Celebrating a special milestone.', uploadedAt: new Date().toISOString(), dataAiHint: "couple celebration" },
-  { id: '3', url: 'https://placehold.co/800x500.png', caption: 'A quiet, lovely evening.', uploadedAt: new Date().toISOString(), dataAiHint: "couple sunset" },
-  { id: '4', url: 'https://placehold.co/500x700.png', caption: 'Adventure awaits!', uploadedAt: new Date().toISOString(), dataAiHint: "couple hiking" },
-];
-
-const defaultPlaylist: Song[] = [
-    { id: '1', title: 'Lover', artist: 'Taylor Swift', spotifyTrackId: '1dGr1c8CrMLDpV6mPbImSI', albumCoverUrl: 'https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647' },
-    { id: '2', title: 'Perfect', artist: 'Ed Sheeran', spotifyTrackId: '0tgVpDi06FyKpA1z0VMD4v', albumCoverUrl: 'https://i.scdn.co/image/ab67616d0000b27333f85b31956360650555a315' },
-    { id: '3', title: 'A Thousand Years', artist: 'Christina Perri', spotifyTrackId: '6lanRgr6wXibZr8KgzXxBl', albumCoverUrl: 'https://i.scdn.co/image/ab67616d0000b273a7a25424282a2673795a87aa' },
-];
-
-// Simulating a "database"
-const mockDatabase: Record<string, CoupleData> = {
-  "demo-id": {
-    id: "demo-id",
-    coupleName: 'Alex & Jamie',
-    startDate: '2020-06-15T10:00:00.000Z',
-    photos: defaultPhotos,
-    playlist: defaultPlaylist,
-  }
-};
-
-
+// Legacy function for backward compatibility
+// Use getUserCouple or getCoupleData directly in new code
 export const getCoupleData = async (id: string): Promise<CoupleData | null> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockDatabase[id] || null;
+  try {
+    return await fetchCoupleData(id);
+  } catch (error) {
+    console.error('Error fetching couple data:', error);
+    return null;
+  }
 };
 
+// Get couple data for a specific user
+export const getUserCoupleData = async (userUid: string): Promise<CoupleData | null> => {
+  try {
+    return await getUserCouple(userUid);
+  } catch (error) {
+    console.error('Error fetching user couple data:', error);
+    return null;
+  }
+};
+
+// Check if user can access couple data
+export const canUserAccessCouple = async (userUid: string, coupleId: string): Promise<boolean> => {
+  try {
+    return await userCanAccessCouple(userUid, coupleId);
+  } catch (error) {
+    console.error('Error checking user access:', error);
+    return false;
+  }
+};
+
+// Update couple data
 export const updateCoupleData = async (id: string, data: Partial<CoupleData>): Promise<CoupleData | null> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  if (mockDatabase[id]) {
-    mockDatabase[id] = { ...mockDatabase[id], ...data };
-    if (data.photos) mockDatabase[id].photos = data.photos; // ensure deep update for arrays
-    if (data.playlist) mockDatabase[id].playlist = data.playlist;
-    return mockDatabase[id];
+  try {
+    await updateCoupleInFirestore(id, data);
+    return await fetchCoupleData(id);
+  } catch (error) {
+    console.error('Error updating couple data:', error);
+    return null;
   }
-  return null;
-};
-
-// Initial data for a new couple space
-export const getInitialCoupleData = (id: string): CoupleData => ({
-  id,
-  coupleName: 'Novo Casal',
-  startDate: new Date().toISOString(),
-  photos: [],
-  playlist: defaultPlaylist.slice(0,1), // Start with one default song
-});
-
-export const createNewCoupleSpace = async (id: string): Promise<CoupleData> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  if (!mockDatabase[id]) {
-    mockDatabase[id] = getInitialCoupleData(id);
-  }
-  return mockDatabase[id];
 };
