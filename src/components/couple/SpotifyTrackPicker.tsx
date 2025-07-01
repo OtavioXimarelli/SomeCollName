@@ -32,12 +32,12 @@ export default function SpotifyTrackPicker({
   const { search, searchResults, isSearching, searchError, clearResults } = useSpotifySearch();
 
   useEffect(() => {
-    if (debouncedSearch) {
-      search(debouncedSearch);
-    } else {
+    if (debouncedSearch?.trim()) {
+      search(debouncedSearch.trim());
+    } else if (searchQuery === '') {
       clearResults();
     }
-  }, [debouncedSearch, search, clearResults]);
+  }, [debouncedSearch, search, clearResults, searchQuery]);
 
   const handleTrackSelect = (spotifyTrack: SpotifyTrack) => {
     try {
@@ -47,6 +47,8 @@ export default function SpotifyTrackPicker({
         artist: spotifyTrack.artists.map(a => a.name).join(', '),
         spotifyTrackId: spotifyTrack.id,
         albumCoverUrl: spotifyTrack.album.images[0]?.url || undefined,
+        addedBy: '', // Will be set in the parent component
+        addedAt: new Date().toISOString(),
       };
 
       onTrackSelect(song);
@@ -64,31 +66,39 @@ export default function SpotifyTrackPicker({
   const isMaxTracksReached = selectedTracks.length >= maxTracks;
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="spotify-search" className="text-fuchsia-700 font-semibold flex items-center gap-2">
-          <Music className="h-4 w-4" />
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <Label htmlFor="spotify-search" className="text-fuchsia-700 font-semibold flex items-center gap-2 text-base">
+          <Music className="h-5 w-5" />
           Buscar Música no Spotify
         </Label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
             id="spotify-search"
             type="text"
             placeholder={placeholder}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearchQuery(value);
+            }}
+            className="pl-12 pr-12 py-3 text-base border-fuchsia-200 focus:border-fuchsia-400 focus:ring-fuchsia-400"
             disabled={isMaxTracksReached}
+            autoComplete="off"
           />
           {isSearching && (
-            <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-fuchsia-500" />
+            <Loader2 className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-fuchsia-500" />
           )}
         </div>
         {isMaxTracksReached && (
-          <p className="text-sm text-amber-600">
-            Máximo de {maxTracks} músicas atingido. Remova uma música para adicionar outra.
-          </p>
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              <p className="font-medium">Limite atingido</p>
+              <p className="text-sm">Máximo de {maxTracks} músicas atingido. Remova uma música para adicionar outra.</p>
+            </AlertDescription>
+          </Alert>
         )}
       </div>
 
@@ -96,9 +106,11 @@ export default function SpotifyTrackPicker({
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <div className="space-y-2">
-              <p className="font-semibold">Erro na busca do Spotify</p>
-              <p className="text-sm">{searchError}</p>
+            <div className="space-y-3">
+              <div>
+                <p className="font-semibold">Erro na busca do Spotify</p>
+                <p className="text-sm mt-1">{searchError}</p>
+              </div>
               <Button
                 size="sm"
                 variant="outline"
@@ -106,7 +118,7 @@ export default function SpotifyTrackPicker({
                 className="text-red-700 border-red-300 hover:bg-red-100"
                 disabled={!searchQuery.trim()}
               >
-                <Search className="h-3 w-3 mr-1" />
+                <Search className="h-4 w-4 mr-2" />
                 Tentar Novamente
               </Button>
             </div>
@@ -115,16 +127,17 @@ export default function SpotifyTrackPicker({
       )}
 
       {searchResults.length > 0 && (
-        <Card className="border-fuchsia-200">
+        <Card className="border-fuchsia-200/50 bg-white/90 shadow-lg">
           <CardContent className="p-0">
-            <ScrollArea className="h-80">
-              <div className="space-y-2 p-4">
+            <ScrollArea className="h-[400px] sm:h-[450px]">
+              <div className="space-y-3 p-4">
                 {searchResults.map((track) => (
                   <div
                     key={track.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-fuchsia-50 transition-colors"
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl border border-fuchsia-100 hover:bg-fuchsia-50/80 transition-all duration-200 hover:shadow-md"
                   >
-                    <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                    {/* Album Cover */}
+                    <div className="relative w-16 h-16 sm:w-14 sm:h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 shadow-sm">
                       {track.album.images[0] ? (
                         <Image
                           src={track.album.images[0].url}
@@ -139,15 +152,21 @@ export default function SpotifyTrackPicker({
                       )}
                     </div>
 
-                    <div className="flex-grow min-w-0">
-                      <h4 className="font-semibold text-gray-900 truncate">{track.name}</h4>
-                      <p className="text-sm text-gray-600 truncate">
+                    {/* Track Information */}
+                    <div className="flex-1 min-w-0 w-full sm:w-auto">
+                      <h4 className="font-semibold text-gray-900 text-base mb-1 leading-tight">
+                        {track.name}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-1 leading-tight">
                         {track.artists.map(a => a.name).join(', ')}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">{track.album.name}</p>
+                      <p className="text-xs text-gray-500 leading-tight">
+                        {track.album.name}
+                      </p>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:flex-shrink-0">
                       {track.preview_url && (
                         <Button
                           size="sm"
@@ -156,7 +175,8 @@ export default function SpotifyTrackPicker({
                             const audio = new Audio(track.preview_url!);
                             audio.play();
                           }}
-                          className="h-8 w-8 p-0"
+                          className="h-9 w-9 p-0 hover:bg-fuchsia-100"
+                          title="Prévia"
                         >
                           <Play className="h-4 w-4" />
                         </Button>
@@ -166,7 +186,8 @@ export default function SpotifyTrackPicker({
                         size="sm"
                         variant="ghost"
                         onClick={() => window.open(track.external_urls.spotify, '_blank')}
-                        className="h-8 w-8 p-0"
+                        className="h-9 w-9 p-0 hover:bg-fuchsia-100"
+                        title="Abrir no Spotify"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -175,15 +196,23 @@ export default function SpotifyTrackPicker({
                         size="sm"
                         onClick={() => handleTrackSelect(track)}
                         disabled={isTrackSelected(track.id) || isMaxTracksReached}
-                        className={isTrackSelected(track.id) ? "bg-green-500 hover:bg-green-600" : ""}
+                        className={`px-4 py-2 font-medium transition-all duration-200 ${
+                          isTrackSelected(track.id) 
+                            ? "bg-green-500 hover:bg-green-600 text-white" 
+                            : "bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 text-white"
+                        }`}
                       >
                         {isTrackSelected(track.id) ? (
                           <>
-                            <Check className="h-4 w-4 mr-1" />
-                            Adicionada
+                            <Check className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Adicionada</span>
+                            <span className="sm:hidden">✓</span>
                           </>
                         ) : (
-                          'Adicionar'
+                          <>
+                            <span className="hidden sm:inline">Adicionar</span>
+                            <span className="sm:hidden">+</span>
+                          </>
                         )}
                       </Button>
                     </div>
@@ -197,18 +226,52 @@ export default function SpotifyTrackPicker({
 
       {/* Selected tracks preview */}
       {selectedTracks.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-fuchsia-700 font-semibold">
-            Músicas Selecionadas ({selectedTracks.length}/{maxTracks})
-          </Label>
-          <div className="flex flex-wrap gap-2">
-            {selectedTracks.map((track) => (
-              <Badge key={track.id} variant="secondary" className="text-xs">
-                {track.title} - {track.artist}
-              </Badge>
-            ))}
-          </div>
-        </div>
+        <Card className="border-fuchsia-200/50 bg-gradient-to-r from-fuchsia-50 to-pink-50 shadow-sm">
+          <CardContent className="p-4">
+            <Label className="text-fuchsia-700 font-semibold flex items-center gap-2 mb-3">
+              <Music className="h-4 w-4" />
+              Músicas Selecionadas ({selectedTracks.length}/{maxTracks})
+            </Label>
+            <div className="space-y-2">
+              {selectedTracks.map((track) => (
+                <div 
+                  key={track.id} 
+                  className="flex items-center gap-3 p-3 bg-white rounded-lg border border-fuchsia-200/50 shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                    {track.albumCoverUrl ? (
+                      <Image
+                        src={track.albumCoverUrl}
+                        alt={track.title}
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Music className="h-4 w-4 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 text-sm leading-tight">
+                      {track.title}
+                    </p>
+                    <p className="text-xs text-gray-600 leading-tight">
+                      {track.artist}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <Badge variant="secondary" className="bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200">
+                      <Check className="h-3 w-3 mr-1" />
+                      Adicionada
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

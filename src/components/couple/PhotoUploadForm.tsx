@@ -138,6 +138,7 @@ export default function PhotoUploadForm({ coupleId, currentPhotos, onPhotoListCh
       const result = await addPhotoAction(coupleId, { 
         url: photoUrl, 
         caption: finalCaption || "",
+        uploadedBy: user.uid,
         dataAiHint: data.context || ""
       });
       

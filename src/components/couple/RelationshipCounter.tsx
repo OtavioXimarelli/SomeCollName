@@ -59,14 +59,18 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
 
   if (!duration) {
     return (
-      <Card className="">
-        <CardHeader>
-          <CardTitle className="flex items-center text-xl font-headline text-fuchsia-700">
-            <CalendarDays className="mr-2 h-6 w-6 text-fuchsia-500" /> Nossa Jornada Até Aqui
+      <Card className="bg-white/90 border-2 border-fuchsia-200/50 shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center text-xl sm:text-2xl font-headline text-fuchsia-700 gap-3">
+            <CalendarDays className="h-6 w-6 sm:h-7 sm:w-7 text-fuchsia-500 animate-pulse" /> 
+            Nossa Jornada Até Aqui
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-rose-600">Carregando duração do relacionamento...</p>
+        <CardContent className="text-center py-8">
+          <div className="space-y-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-500 mx-auto"></div>
+            <p className="text-rose-600 font-medium">Carregando duração do relacionamento...</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -74,14 +78,18 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
   
   if (isNaN(startDate.getTime())) {
      return (
-      <Card className="">
-        <CardHeader>
-          <CardTitle className="flex items-center text-xl font-headline text-fuchsia-700">
-            <CalendarDays className="mr-2 h-6 w-6 text-fuchsia-500" /> Nossa Jornada Até Aqui
+      <Card className="bg-white/90 border-2 border-red-200/50 shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center text-xl sm:text-2xl font-headline text-red-700 gap-3">
+            <CalendarDays className="h-6 w-6 sm:h-7 sm:w-7 text-red-500" /> 
+            Nossa Jornada Até Aqui
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-destructive-foreground bg-destructive p-2 rounded-md">Data de início inválida. Por favor, defina uma data válida na seção de edição.</p>
+        <CardContent className="text-center py-6">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-700 font-medium mb-2">📅 Data de início inválida</p>
+            <p className="text-sm text-red-600">Por favor, defina uma data válida na seção de edição.</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -89,23 +97,56 @@ export default function RelationshipCounter({ startDate: startDateString }: Rela
 
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col items-center">
-        <h2 className="flex items-center text-lg font-headline text-fuchsia-700 mb-4 gap-2">
-          <CalendarDays className="h-6 w-6 text-fuchsia-500" /> Nossa Jornada Até Aqui
-        </h2>
-        <div className="flex flex-wrap justify-center gap-3 mb-2">
-          {Object.entries(duration).map(([unit, value]) => (
-            <div key={unit} className="flex flex-col items-center px-3 py-2 bg-white/80 border-2 border-fuchsia-200 rounded-lg shadow-sm min-w-[60px]">
-              <span className="text-2xl font-bold text-fuchsia-700 leading-tight">{value}</span>
-              <span className="text-xs text-fuchsia-500 uppercase tracking-wide mt-1">{unit.charAt(0).toUpperCase() + unit.slice(1)}</span>
-            </div>
-          ))}
+    <Card className="bg-white/90 border-2 border-fuchsia-200/50 shadow-lg overflow-hidden">
+      <CardHeader className="text-center pb-2">
+        <CardTitle className="flex items-center justify-center text-xl sm:text-2xl font-headline text-fuchsia-700 gap-3">
+          <CalendarDays className="h-6 w-6 sm:h-7 sm:w-7 text-fuchsia-500" /> 
+          Nossa Jornada Até Aqui
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 sm:px-6 pb-6">
+        <div className="text-center space-y-4">
+          {/* Duration Grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+            {Object.entries(duration).map(([unit, value]) => {
+              const unitLabels: Record<string, string> = {
+                years: 'Anos',
+                months: 'Meses', 
+                days: 'Dias',
+                hours: 'Horas',
+                minutes: 'Min',
+                seconds: 'Seg'
+              };
+              
+              return (
+                <div key={unit} className="flex flex-col items-center p-3 sm:p-4 bg-gradient-to-b from-fuchsia-50 to-pink-50 border border-fuchsia-200/60 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold text-fuchsia-700 leading-none">
+                    {value.toString().padStart(2, '0')}
+                  </span>
+                  <span className="text-xs sm:text-sm text-fuchsia-600 font-medium uppercase tracking-wide mt-1">
+                    {unitLabels[unit]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Start Date Info */}
+          <div className="mt-6 p-4 bg-gradient-to-r from-pink-50 to-fuchsia-50 rounded-xl border border-pink-200/50">
+            <p className="text-sm sm:text-base text-rose-600 font-medium">
+              💕 Iniciado em: {startDate.toLocaleDateString('pt-BR', { 
+                weekday: 'long',
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </p>
+            <p className="text-xs sm:text-sm text-rose-500 mt-1">
+              Cada segundo juntos é especial ✨
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-rose-500 mt-2 text-center">
-          Iniciado em: {startDate.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
