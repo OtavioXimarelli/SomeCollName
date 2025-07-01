@@ -1,7 +1,7 @@
 "use server";
 import { suggestPhotoCaption as genAiSuggestPhotoCaption, type SuggestPhotoCaptionInput, type SuggestPhotoCaptionOutput } from '@/ai/flows/suggest-photo-caption';
 import type { CoupleData, Photo, Song } from '@/types';
-import { updateCoupleData as updateMockData, createNewCoupleSpace as createMockSpace, getCoupleData as getMockData } from './mock-data';
+import { updateCoupleData, getCoupleData } from './firestore-service';
 import { revalidatePath } from 'next/cache';
 
 export async function suggestPhotoCaptionAction(input: SuggestPhotoCaptionInput): Promise<SuggestPhotoCaptionOutput> {
@@ -14,12 +14,15 @@ export async function suggestPhotoCaptionAction(input: SuggestPhotoCaptionInput)
 }
 
 export async function saveCoupleDetailsAction(id: string, details: { coupleName?: string; startDate?: string }): Promise<CoupleData | null> {
-  const existingData = await getMockData(id);
+  const existingData = await getCoupleData(id);
   if (!existingData) {
-    await createMockSpace(id); // Create if doesn't exist
+    console.error(`Couple with id ${id} not found. Cannot update.`);
+    return null;
   }
   
-  const updatedData = await updateMockData(id, details);
+  await updateCoupleData(id, details);
+  const updatedData = await getCoupleData(id);
+
   if (updatedData) {
     revalidatePath(`/couple/${id}`);
     revalidatePath(`/couple/${id}/edit`);
@@ -28,7 +31,7 @@ export async function saveCoupleDetailsAction(id: string, details: { coupleName?
 }
 
 export async function addPhotoAction(id: string, newPhoto: Omit<Photo, 'id' | 'uploadedAt'>): Promise<CoupleData | null> {
-  const coupleData = await getMockData(id);
+  const coupleData = await getCoupleData(id);
   if (!coupleData) return null;
 
   const photoWithId: Photo = { 
@@ -38,7 +41,8 @@ export async function addPhotoAction(id: string, newPhoto: Omit<Photo, 'id' | 'u
   };
   
   const updatedPhotos = [...coupleData.photos, photoWithId];
-  const updatedData = await updateMockData(id, { photos: updatedPhotos });
+  await updateCoupleData(id, { photos: updatedPhotos });
+  const updatedData = await getCoupleData(id);
 
   if (updatedData) {
     revalidatePath(`/couple/${id}`);
@@ -48,11 +52,12 @@ export async function addPhotoAction(id: string, newPhoto: Omit<Photo, 'id' | 'u
 }
 
 export async function deletePhotoAction(coupleId: string, photoId: string): Promise<CoupleData | null> {
-  const coupleData = await getMockData(coupleId);
+  const coupleData = await getCoupleData(coupleId);
   if (!coupleData) return null;
 
   const updatedPhotos = coupleData.photos.filter(p => p.id !== photoId);
-  const updatedData = await updateMockData(coupleId, { photos: updatedPhotos });
+  await updateCoupleData(coupleId, { photos: updatedPhotos });
+  const updatedData = await getCoupleData(coupleId);
   
   if (updatedData) {
     revalidatePath(`/couple/${coupleId}`);
@@ -62,13 +67,14 @@ export async function deletePhotoAction(coupleId: string, photoId: string): Prom
 }
 
 export async function updatePhotoCaptionAction(coupleId: string, photoId: string, newCaption: string): Promise<CoupleData | null> {
-  const coupleData = await getMockData(coupleId);
+  const coupleData = await getCoupleData(coupleId);
   if (!coupleData) return null;
 
   const updatedPhotos = coupleData.photos.map(p => 
     p.id === photoId ? { ...p, caption: newCaption } : p
   );
-  const updatedData = await updateMockData(coupleId, { photos: updatedPhotos });
+  await updateCoupleData(coupleId, { photos: updatedPhotos });
+  const updatedData = await getCoupleData(coupleId);
 
   if (updatedData) {
     revalidatePath(`/couple/${coupleId}`);
@@ -79,7 +85,8 @@ export async function updatePhotoCaptionAction(coupleId: string, photoId: string
 
 
 export async function updatePlaylistAction(id: string, newPlaylist: Song[]): Promise<CoupleData | null> {
-  const updatedData = await updateMockData(id, { playlist: newPlaylist });
+  await updateCoupleData(id, { playlist: newPlaylist });
+  const updatedData = await getCoupleData(id);
   if (updatedData) {
     revalidatePath(`/couple/${id}`);
     revalidatePath(`/couple/${id}/edit`);

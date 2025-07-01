@@ -1,7 +1,8 @@
 import EditCouplePageClient from '@/components/couple/EditCouplePageClient';
-import { getCoupleData, createNewCoupleSpace } from '@/lib/mock-data';
+import { getCoupleData } from '@/lib/firestore-service';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,24 +12,23 @@ interface CoupleEditPageProps {
 
 export default async function CoupleEditPage({ params }: CoupleEditPageProps) {
   const { id } = await params;
-  let coupleData = await getCoupleData(id);
+  const coupleData = await getCoupleData(id);
 
   if (!coupleData) {
-    // Se não houver dados, pode ser um novo espaço de casal. Crie-o.
-    coupleData = await createNewCoupleSpace(id);
-    // Fallback se a criação também falhar ou não for desejada aqui
-    if(!coupleData) {
-       return (
-        <div className="text-center py-10">
-          <h1 className="text-3xl font-headline mb-4">Erro</h1>
-          <p className="text-muted-foreground mb-6">Não foi possível carregar ou criar os dados do espaço do casal para o ID "{id}".</p>
-          <Button asChild>
-            <Link href="/">Ir para a Página Inicial</Link>
-          </Button>
-        </div>
-      );
-    }
+    return (
+      <div className="text-center py-10">
+        <h1 className="text-3xl font-headline mb-4">Espaço do Casal Não Encontrado</h1>
+        <p className="text-muted-foreground mb-6">O espaço com ID "{id}" não foi encontrado. Verifique se você tem permissão para acessá-lo.</p>
+        <Button asChild>
+          <Link href="/">Ir para a Página Inicial</Link>
+        </Button>
+      </div>
+    );
   }
-  
-  return <EditCouplePageClient coupleData={coupleData} />;
+
+  return (
+    <ProtectedRoute>
+      <EditCouplePageClient coupleData={coupleData} />
+    </ProtectedRoute>
+  );
 }

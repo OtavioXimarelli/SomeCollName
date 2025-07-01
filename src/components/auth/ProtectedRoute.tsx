@@ -11,9 +11,9 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
 
-  if (loading) {
+  if (loading || (user && !userProfile)) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50">
         <div className="text-center">

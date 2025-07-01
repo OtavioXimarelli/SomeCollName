@@ -14,7 +14,7 @@ export default async function CouplePageLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50">
       {/* Enhanced Navigation Header */}
-      <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-xl border-b border-pink-200/30">
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-pink-200/30 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-between py-4">
             {/* Back to Home */}
@@ -65,9 +65,9 @@ export default async function CouplePageLayout({
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="pt-4">
         {children}
-      </div>
+      </main>
     </div>
   );
 }
